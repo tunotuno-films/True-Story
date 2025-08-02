@@ -9,7 +9,7 @@ const Message: React.FC = () => {
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="md:w-1/3">
             <img
-              src="/img/logo.jpeg"
+              src="https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/logo.jpeg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvbG9nby5qcGVnIiwiaWF0IjoxNzU0MTM5OTMxLCJleHAiOjIwMzc5NjM5MzF9.K2LSo8QRE3kiuLkf5ct0Y0s0YTSrJlmPcEDjPJYHzFU"
               alt="アーティスト写真"
               className="rounded-full shadow-lg w-full max-w-sm mx-auto"
             />
