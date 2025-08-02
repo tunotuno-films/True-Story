@@ -9,7 +9,7 @@ const Message: React.FC = () => {
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="md:w-1/3">
             <img
-              src="https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&dpr=2"
+              src="/img/logo.jpeg"
               alt="アーティスト写真"
               className="rounded-full shadow-lg w-full max-w-sm mx-auto"
             />
