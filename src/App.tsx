@@ -1,28 +1,35 @@
-import React from 'react';
+import { useState } from 'react';
 import Header from './components/Header';
-import Navigation from './components/Navigation';
+import Title from './components/Title';
 import Introduction from './components/Introduction';
-import ConceptMovie from './components/ConceptMovie';
 import Message from './components/Message';
-import ArtistStaff from './components/ArtistStaff';
+import TrueStorySection from './components/TrueStorySection';
+import Artist from './components/Artist';
 import News from './components/News';
-import Project from './components/Project';
+import Crowdfunding from './components/Project';
 import Footer from './components/Footer';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 function App() {
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+
+  const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
+  const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
+
   return (
-    <div className="bg-black text-gray-200">
+    <div className="bg-black">
       <Header />
-      <main className="w-full">
-        <Navigation />
+      <Title />
+      <main>
         <Introduction />
-        <ConceptMovie />
         <Message />
-        <ArtistStaff />
+        <TrueStorySection />
+        <Artist onShowPrivacyPolicy={openPrivacyPolicy} />
         <News />
-        <Project />
+        <Crowdfunding />
       </main>
-      <Footer />
+      <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
+      {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
     </div>
   );
 }
