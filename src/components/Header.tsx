@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { Menu, X } from 'lucide-react';
 
 interface Vote {
   message: string | null;
@@ -8,6 +9,7 @@ interface Vote {
 
 const Header: React.FC = () => {
   const [latestVotes, setLatestVotes] = useState<Vote[]>([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const animationRef = useRef<HTMLDivElement>(null);
 
   const fetchLatestVotes = useCallback(async () => {
@@ -42,6 +44,11 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleMobileLinkClick = (sectionId: string) => {
+    scrollToSection(sectionId);
+    setIsMenuOpen(false);
+  };
+
   const navItems = [
     { id: 'introduction', label: 'INTRODUCTION' },
     { id: 'message', label: 'MESSAGE' },
@@ -61,8 +68,8 @@ const Header: React.FC = () => {
               True Story
             </div>
             
-            {/* 右端のメニュー */}
-            <div className="flex items-center space-x-4 md:space-x-8">
+            {/* デスクトップ用メニュー (md以上で表示) */}
+            <div className="hidden md:flex items-center space-x-4 md:space-x-8">
               {navItems.map((item) => (
                 <button
                   key={item.id}
@@ -73,8 +80,32 @@ const Header: React.FC = () => {
                 </button>
               ))}
             </div>
+
+            {/* モバイル用ハンバーガーボタン (md未満で表示) */}
+            <div className="md:hidden">
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white">
+                {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* モバイル用メニューパネル */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-black absolute w-full">
+            <div className="container mx-auto px-4 pb-4">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleMobileLinkClick(item.id)}
+                  className="block w-full text-left py-3 text-neutral-300 hover:text-white transition duration-300 font-noto"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
       
       {/* 応援メッセージセクション - 固定表示 */}
