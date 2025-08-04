@@ -56,6 +56,7 @@ const Header: React.FC = () => {
     { id: 'artist', label: 'ARTIST' },
     { id: 'news', label: 'NEWS' },
     { id: 'crowdfunding', label: 'PROJECT' },
+    { id: 'contact', label: 'CONTACT' },
   ];
 
   return (

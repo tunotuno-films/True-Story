@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-const TrueStorySection: React.FC = () => {
+const TrueStory: React.FC = () => {
   const [story, setStory] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showError, setShowError] = useState(false);
   const maxLength = 2000;
   const localStorageKey = 'trueStoryDraft';
 
@@ -32,7 +33,8 @@ const TrueStorySection: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!story.trim()) {
-      alert('物語を入力してください。');
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000); // 3秒後に自動で非表示
       return;
     }
     setIsSubmitting(true);
@@ -54,7 +56,8 @@ const TrueStorySection: React.FC = () => {
     })
     .catch(error => {
       console.error('Error submitting form:', error);
-      alert('送信中にエラーが発生しました。');
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
       setIsSubmitting(false);
     });
   };
@@ -68,6 +71,18 @@ const TrueStorySection: React.FC = () => {
         <p className="font-noto text-lg text-center text-neutral-300 mb-12">
           あなたの「実話の物語」を教えてください。
         </p>
+
+        {/* カスタムエラーメッセージ */}
+        {showError && (
+          <div className="mb-6 p-4 bg-red-900/50 border-l-4 border-red-500 text-red-200 rounded-md animate-pulse">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">フォームを入力してください。</span>
+            </div>
+          </div>
+        )}
 
         {isSubmitted ? (
           <div className="text-center bg-emerald-900/50 border border-emerald-700 text-white p-8 rounded-lg">
@@ -87,8 +102,9 @@ const TrueStorySection: React.FC = () => {
               onChange={handleStoryChange}
               placeholder="ここにあなたの物語を記入してください..."
               rows={10}
-              className="w-full p-4 bg-neutral-800 text-white rounded-md border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
-              required
+              className={`w-full p-4 bg-neutral-800 text-white rounded-md border transition-colors text-lg ${
+                showError ? 'border-red-500 focus:ring-2 focus:ring-red-500' : 'border-neutral-700 focus:outline-none focus:ring-2 focus:ring-purple-500'
+              }`}
             />
             <div className="text-right text-neutral-400 text-sm mt-2 pr-1">
               {story.length} / {maxLength}
@@ -97,7 +113,7 @@ const TrueStorySection: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg disabled:opacity-50"
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg disabled:opacity-50"
               >
                 {isSubmitting ? '送信中...' : 'この物語を投稿する'}
               </button>
@@ -114,4 +130,4 @@ const TrueStorySection: React.FC = () => {
   );
 };
 
-export default TrueStorySection;
+export default TrueStory;
