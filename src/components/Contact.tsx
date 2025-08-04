@@ -19,17 +19,7 @@ const Contact: React.FC<ContactProps> = ({ onShowPrivacyPolicy }) => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    // ↓↓↓ あなたのGoogleフォームの情報に置き換えてください ↓↓↓
-    const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScb8qou8O0Ed_9g-nBFB2tXPH6wwPtgtRYHhboqwqQJ1hBIng/formResponse'; // あなたのフォームURL
-    const NAME_INPUT_NAME = 'entry.925362011'; // お名前のentry ID
-    const COMPANY_INPUT_NAME = 'entry.1358542594'; // 会社名のentry ID
-    const EMAIL_INPUT_NAME = 'entry.425392835'; // メールのentry ID
-    const PHONE_INPUT_NAME = 'entry.907531421'; // 電話番号のentry ID
-    const INQUIRY_TYPE_INPUT_NAME = 'entry.282942206'; // お問い合わせの種類のentry ID
-    const MESSAGE_INPUT_NAME = 'entry.688326170'; // お問い合わせ内容のentry ID
-    // ↑↑↑ あなたのGoogleフォームの情報に置き換えてください ↑↑↑
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.email || !formData.message || !formData.inquiryType) {
             setErrorMessage('必須項目をすべて入力してください。');
@@ -50,28 +40,27 @@ const Contact: React.FC<ContactProps> = ({ onShowPrivacyPolicy }) => {
         setIsError(false);
         setErrorMessage('');
 
-        const googleFormData = new FormData();
-        googleFormData.append(NAME_INPUT_NAME, formData.name);
-        googleFormData.append(COMPANY_INPUT_NAME, formData.company);
-        googleFormData.append(EMAIL_INPUT_NAME, formData.email);
-        googleFormData.append(PHONE_INPUT_NAME, formData.phone);
-        googleFormData.append(INQUIRY_TYPE_INPUT_NAME, formData.inquiryType);
-        googleFormData.append(MESSAGE_INPUT_NAME, formData.message);
+        try {
+            const response = await fetch('/api/submit-form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
 
-        fetch(GOOGLE_FORM_ACTION_URL, {
-            method: 'POST',
-            body: googleFormData,
-            mode: 'no-cors',
-        })
-        .then(() => {
-            setIsSubmitting(false);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
             setIsSuccess(true);
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error submitting form:', error);
-            setIsSubmitting(false);
+            setErrorMessage('送信中にエラーが発生しました。');
             setIsError(true);
-        });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (

@@ -8,10 +8,9 @@ const TrueStory: React.FC = () => {
   const maxLength = 2000;
   const localStorageKey = 'trueStoryDraft';
 
-  // ↓↓↓ あなたのGoogleフォームの情報に置き換えてください ↓↓↓
-  const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScNvtbhGpynHbYUfvGvLHLo2MKSxsBLYDkNewyHHGDD3X7zPg/formResponse';
-  const STORY_INPUT_NAME = 'entry.925362011';
-  // ↑↑↑ あなたのGoogleフォームの情報に置き換えてください ↑↑↑
+  // Googleフォームの情報を環境変数から取得
+  const GOOGLE_FORM_ACTION_URL = import.meta.env.VITE_TRUESTORY_FORM_ACTION_URL || '';
+  const STORY_INPUT_NAME = import.meta.env.VITE_TRUESTORY_INPUT_NAME || '';
 
   // コンポーネント読み込み時にlocalStorageから下書きを復元
   useEffect(() => {

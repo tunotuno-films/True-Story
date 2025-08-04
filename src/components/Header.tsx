@@ -60,8 +60,8 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <>
-      <nav className="bg-black sticky top-0 z-50">
+    <header className="sticky top-0 z-50">
+      <nav className="bg-black">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* 左端のタイトル */}
@@ -109,8 +109,8 @@ const Header: React.FC = () => {
         )}
       </nav>
       
-      {/* 応援メッセージセクション - 固定表示 */}
-      <div className="bg-gray-800/30 backdrop-blur-sm sticky top-16 z-40 py-2 overflow-hidden">
+      {/* 応援メッセージセクション */}
+      <div className="bg-gray-800/30 backdrop-blur-sm py-2 overflow-hidden">
         <div className="container mx-auto px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
             {latestVotes.length > 0 && (
@@ -136,7 +136,7 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
-    </>
+    </header>
   );
 };
 
