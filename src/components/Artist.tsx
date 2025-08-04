@@ -108,7 +108,7 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
           <div className="text-center mt-16">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg"
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg"
             >
               投票する
             </button>

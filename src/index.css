@@ -73,6 +73,30 @@ html {
   }
 }
 
+/* --- New Loading Animation Styles --- */
+
+@keyframes draw-continuous {
+  0% {
+    stroke-dashoffset: 2000;
+  }
+  90% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-out-slow {
+  0%, 85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 @keyframes scroll-left {
   0% {
     transform: translateX(100%);
@@ -82,6 +106,20 @@ html {
   }
 }
 
+.continuous-line {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: draw-continuous 3s ease-in-out forwards;
+}
+
+.animate-fade-out-slow {
+  animation: fade-out-slow 4s ease-in-out forwards;
+}
+
 .animate-scroll-left {
   animation: scroll-left 30s linear infinite;
+}
+
+.animate-scroll-left-slow {
+  animation: scroll-left 80s linear infinite;
 }
