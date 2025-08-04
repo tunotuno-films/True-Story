@@ -15,20 +15,20 @@ const Title: React.FC = () => {
   ];
 
   return (
-    <header className="hero-bg h-screen w-full flex flex-col justify-end items-start relative text-white -mt-28">
-      <div className="relative z-10 p-8 md:p-12 w-full">
-        <h2 className="font-noto text-xl md:text-3xl font-bold text-shadow mb-4">
+    <header className="hero-bg w-full flex flex-col justify-end items-start relative text-white -mt-28 h-screen aspect-[9/16] md:aspect-[16/9]">
+      <div className="relative z-10 p-6 md:p-12 w-full">
+        <h2 className="font-noto text-lg md:text-3xl font-bold text-shadow mb-2 md:mb-4">
           これは、あなたの物語かもしれない。
         </h2>
-        <h1 className="font-noto text-5xl md:text-8xl font-black text-shadow tracking-wider">
+        <h1 className="font-noto text-4xl md:text-8xl font-black text-shadow tracking-wider">
           True Story
         </h1>
-        <p className="font-noto text-2xl md:text-4xl font-bold text-shadow mt-2">
+        <p className="font-noto text-xl md:text-4xl font-bold text-shadow mt-1 md:mt-2">
           【実話の物語】
         </p>
         
-        <div className="mt-8">
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-shadow">
+        <div className="mt-4 md:mt-8">
+          <div className="flex flex-wrap gap-x-2 md:gap-x-4 gap-y-1 text-xs md:text-sm text-shadow">
             <span className="font-bold">制作:</span>
             {staff.map((name, index) => (
               <span key={index}>{name}</span>
@@ -38,14 +38,14 @@ const Title: React.FC = () => {
 
         <button
           onClick={() => scrollToSection('crowdfunding')}
-          className="btn-cta inline-block mt-12 bg-white text-black font-bold font-noto py-4 px-12 rounded-full text-lg shadow-lg"
+          className="btn-cta inline-block mt-6 md:mt-12 mb-8 md:mb-0 bg-white text-black font-bold font-noto py-3 md:py-4 px-8 md:px-12 rounded-full text-base md:text-lg shadow-lg"
         >
           クラウドファンディングで応援する
         </button>
-        <p className="font-noto mt-4 text-sm">受付期間: 2025.08.10 - 2025.09.30</p>
+        <p className="font-noto mt-2 md:mt-4 text-xs md:text-sm">受付期間: 2025.08.10 - 2025.09.30</p>
       </div>
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <ChevronDown className="w-8 h-8 text-white" />
+      <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <ChevronDown className="w-6 h-6 md:w-8 md:h-8 text-white" />
       </div>
     </header>
   );

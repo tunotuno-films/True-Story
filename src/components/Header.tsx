@@ -92,25 +92,43 @@ const Header: React.FC = () => {
         </div>
 
         {/* モバイル用メニューパネル */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-black absolute w-full">
-            <div className="container mx-auto px-4 pb-4">
-              {navItems.map((item) => (
+        <div 
+          className={`md:hidden bg-black/95 backdrop-blur-md absolute w-full z-40 shadow-lg border-t border-gray-700 transition-all duration-300 ease-in-out transform origin-top ${
+            isMenuOpen 
+              ? 'opacity-100 scale-y-100 translate-y-0' 
+              : 'opacity-0 scale-y-0 -translate-y-2 pointer-events-none'
+          }`}
+        >
+          <div className="container mx-auto px-4 pb-4">
+            {navItems.map((item, index) => (
+              <div 
+                key={item.id}
+                className={`transition-all duration-300 ease-in-out ${
+                  isMenuOpen 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-2'
+                }`}
+                style={{ 
+                  transitionDelay: isMenuOpen ? `${index * 50}ms` : '0ms' 
+                }}
+              >
                 <button
-                  key={item.id}
                   onClick={() => handleMobileLinkClick(item.id)}
-                  className="block w-full text-left py-3 text-neutral-300 hover:text-white transition duration-300 font-noto"
+                  className="block w-full text-left py-4 px-2 text-neutral-300 hover:text-white hover:bg-gray-800/50 transition-all duration-300 font-noto rounded-md"
                 >
                   {item.label}
                 </button>
-              ))}
-            </div>
+                {index < navItems.length - 1 && (
+                  <div className="border-b border-gray-700/50 mx-2"></div>
+                )}
+              </div>
+            ))}
           </div>
-        )}
+        </div>
       </nav>
       
       {/* 応援メッセージセクション */}
-      <div className="bg-gray-800/30 backdrop-blur-sm py-2 overflow-hidden">
+      <div className="bg-gray-800/30 backdrop-blur-sm py-2 overflow-hidden relative z-10">
         <div className="container mx-auto px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
             {latestVotes.length > 0 && (
