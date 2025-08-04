@@ -5,12 +5,13 @@ const TrueStory: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const maxLength = 2000;
   const localStorageKey = 'trueStoryDraft';
 
-  // Googleフォームの情報を環境変数から取得
-  const GOOGLE_FORM_ACTION_URL = import.meta.env.VITE_TRUESTORY_FORM_ACTION_URL || '';
-  const STORY_INPUT_NAME = import.meta.env.VITE_TRUESTORY_INPUT_NAME || '';
+  // 正しいTrueStoryフォームの情報
+  const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScNvtbhGpynHbYUfvGvLHLo2MKSxsBLYDkNewyHHGDD3X7zPg/formResponse';
+  const STORY_INPUT_NAME = 'entry.925362011'; // TrueStoryフォームのエントリーID
 
   // コンポーネント読み込み時にlocalStorageから下書きを復元
   useEffect(() => {
@@ -32,11 +33,14 @@ const TrueStory: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!story.trim()) {
+      setErrorMessage('フォームを入力してください。');
       setShowError(true);
       setTimeout(() => setShowError(false), 3000); // 3秒後に自動で非表示
       return;
     }
     setIsSubmitting(true);
+    setErrorMessage('');
+    setShowError(false);
 
     const formData = new FormData();
     formData.append(STORY_INPUT_NAME, story);
@@ -55,8 +59,8 @@ const TrueStory: React.FC = () => {
     })
     .catch(error => {
       console.error('Error submitting form:', error);
+      setErrorMessage('送信中にエラーが発生しました。');
       setShowError(true);
-      setTimeout(() => setShowError(false), 3000);
       setIsSubmitting(false);
     });
   };
@@ -73,12 +77,12 @@ const TrueStory: React.FC = () => {
 
         {/* カスタムエラーメッセージ */}
         {showError && (
-          <div className="mb-6 p-4 bg-red-900/50 border-l-4 border-red-500 text-red-200 rounded-md animate-pulse">
+          <div className="mb-6 p-4 bg-red-900/50 border-l-4 border-red-500 text-red-200 rounded-md">
             <div className="flex items-center">
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              <span className="font-medium">フォームを入力してください。</span>
+              <span className="font-medium">{errorMessage}</span>
             </div>
           </div>
         )}
