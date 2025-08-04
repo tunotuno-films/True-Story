@@ -19,14 +19,14 @@ const Contact: React.FC<ContactProps> = ({ onShowPrivacyPolicy }) => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    // Googleフォームの情報を環境変数から取得
-    const GOOGLE_FORM_ACTION_URL = import.meta.env.VITE_GOOGLE_FORM_ACTION_URL || '';
-    const NAME_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_NAME_ID || '';
-    const COMPANY_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_COMPANY_ID || '';
-    const EMAIL_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_EMAIL_ID || '';
-    const PHONE_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_PHONE_ID || '';
-    const INQUIRY_TYPE_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_INQUIRY_TYPE_ID || '';
-    const MESSAGE_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_MESSAGE_ID || '';
+    // Googleフォームの情報を環境変数から取得（フォールバック付き）
+    const GOOGLE_FORM_ACTION_URL = import.meta.env.VITE_GOOGLE_FORM_ACTION_URL || 'https://docs.google.com/forms/d/e/1FAIpQLScb8qou8O0Ed_9g-nBFB2tXPH6wwPtgtRYHhboqwqQJ1hBIng/formResponse';
+    const NAME_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_NAME_ID || 'entry.925362011';
+    const COMPANY_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_COMPANY_ID || 'entry.1358542594';
+    const EMAIL_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_EMAIL_ID || 'entry.425392835';
+    const PHONE_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_PHONE_ID || 'entry.907531421';
+    const INQUIRY_TYPE_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_INQUIRY_TYPE_ID || 'entry.282942206';
+    const MESSAGE_INPUT_NAME = import.meta.env.VITE_GOOGLE_FORM_MESSAGE_ID || 'entry.688326170';
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
