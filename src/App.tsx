@@ -40,7 +40,7 @@ function App() {
         <Introduction />
         <Message />
         <GoldAd />
-        <TrueStory />
+        <TrueStory onShowPrivacyPolicy={openPrivacyPolicy} />
         <Artist onShowPrivacyPolicy={openPrivacyPolicy} />
         <Crowdfunding />
         <SponsorSection />

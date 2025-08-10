@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-const TrueStory: React.FC = () => {
+interface TrueStoryProps {
+  onShowPrivacyPolicy: () => void;
+}
+
+const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
   const [story, setStory] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,9 +111,9 @@ const TrueStory: React.FC = () => {
       });
   };
 
-  // プライバシーポリシー表示用の関数
-  const onShowPrivacyPolicy = () => {
-    window.open('/privacy-policy', '_blank');
+  // プライバシーポリシー表示用の関数（propsから必ず受け取る）
+  const handlePrivacyClick = () => {
+    onShowPrivacyPolicy();
   };
 
   return (
@@ -241,7 +245,11 @@ const TrueStory: React.FC = () => {
                 <div className="text-center text-xs text-neutral-400 mb-4">
                   <p>
                     「送信する」ボタンを押すことにより、
-                    <button type="button" onClick={typeof onShowPrivacyPolicy === 'function' ? onShowPrivacyPolicy : undefined} className="text-cyan-400 hover:underline">
+                    <button
+                      type="button"
+                      onClick={handlePrivacyClick}
+                      className="text-cyan-400 hover:underline"
+                    >
                       個人情報の取り扱い
                     </button>
                     について同意したものとみなします。
