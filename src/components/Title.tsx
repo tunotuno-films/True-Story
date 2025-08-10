@@ -1,6 +1,9 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
+const BG_IMAGE_URL =
+  'https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/20230218-046A9816.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvMjAyMzAyMTgtMDQ2QTk4MTYuanBnIiwiaWF0IjoxNzU0ODIyMzMyLCJleHAiOjQ4NzY4ODYzMzJ9.pGTfHT_nOQ0BULBGKy_h4puzruLByizktom_OUd788c';
+
 const Title: React.FC = () => {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -16,13 +19,8 @@ const Title: React.FC = () => {
 
   return (
     <header
-      className="w-full flex flex-col justify-end items-start relative text-white -mt-28 h-screen"
-      style={{
-        backgroundImage: 'url(https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/20230218-046A9816.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvMjAyMzAyMTgtMDQ2QTk4MTYuanBnIiwiaWF0IjoxNzU0ODIyMzMyLCJleHAiOjQ4NzY4ODYzMzJ9.pGTfHT_nOQ0BULBGKy_h4puzruLByizktom_OUd788c)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
+      className="w-full flex flex-col justify-end items-start relative text-white -mt-28 h-screen bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${BG_IMAGE_URL})` }}
     >
       {/* 黒いオーバーレイ */}
       {/* <div className="absolute inset-0 bg-black/70 z-0" /> */}

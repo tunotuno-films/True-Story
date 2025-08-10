@@ -96,7 +96,7 @@ const MainAd: React.FC = () => {
                         src={getVimeoEmbedUrl(ad.url)}
                         allow="autoplay; fullscreen"
                         className="w-full h-full"
-                        title={`main-ad-${idx}`}
+                        title={`Sponsor video ${idx + 1}`}
                         style={{ pointerEvents: 'none', border: 0 }}
                       />
                     )}
