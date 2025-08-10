@@ -15,7 +15,17 @@ const Title: React.FC = () => {
   ];
 
   return (
-    <header className="hero-bg w-full flex flex-col justify-end items-start relative text-white -mt-28 h-screen aspect-[9/16] md:aspect-[16/9]">
+    <header
+      className="w-full flex flex-col justify-end items-start relative text-white -mt-28 h-screen"
+      style={{
+        backgroundImage: 'url(https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/20230218-046A9816.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvMjAyMzAyMTgtMDQ2QTk4MTYuanBnIiwiaWF0IjoxNzU0ODIyMzMyLCJleHAiOjQ4NzY4ODYzMzJ9.pGTfHT_nOQ0BULBGKy_h4puzruLByizktom_OUd788c)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* 黒いオーバーレイ */}
+      {/* <div className="absolute inset-0 bg-black/70 z-0" /> */}
       <div className="relative z-10 p-6 md:p-12 w-full">
         <h2 className="font-noto text-lg md:text-3xl font-bold text-shadow mb-2 md:mb-4">
           これは、あなたの物語かもしれない。
@@ -44,7 +54,7 @@ const Title: React.FC = () => {
         </button>
         <p className="font-noto mt-2 md:mt-4 text-xs md:text-sm">受付期間: 2025.08.10 - 2025.09.30</p>
       </div>
-      <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-10">
         <ChevronDown className="w-6 h-6 md:w-8 md:h-8 text-white" />
       </div>
     </header>
