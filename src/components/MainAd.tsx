@@ -8,23 +8,23 @@ interface SponsorAd {
   ad_link_2?: string;
 }
 
-// Vimeo埋め込みURL生成
+// Generate Vimeo embed URL
 const getVimeoEmbedUrl = (input?: string) => {
   if (!input) return '';
-  // iframeタグからsrc属性を抽出
+  // Extract src attribute from iframe tag
   const srcMatch = input.match(/src="([^"]+)"/);
   if (srcMatch) return srcMatch[1];
-  // 直接URLの場合
+  // If direct URL, extract video ID
   const urlMatch = input.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   return urlMatch
     ? `https://player.vimeo.com/video/${urlMatch[1]}?autoplay=1&loop=1&muted=1&background=1`
     : '';
 };
 
-// 画像かどうか判定
+// Check if the URL is an image
 const isImageUrl = (url?: string) => {
   if (!url) return false;
-  // 拡張: SupabaseストレージURLも画像として判定
+  // Also treat Supabase storage URLs as images
   return (
     /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) ||
     url.startsWith('data:image') ||
@@ -42,17 +42,19 @@ const MainAd: React.FC = () => {
         .select('ad_url_1, ad_url_2, ad_link_1, ad_link_2')
         .eq('type', 'main')
         .single();
-      if (!error && data) {
+      if (error) {
+        console.error('Error fetching main ad:', error);
+      } else if (data) {
         setAdUrls(data as SponsorAd);
       }
     };
     fetchAdUrls();
   }, []);
 
-  const adData = [
+  const adData = React.useMemo(() => [
     { url: adUrls.ad_url_1, link: adUrls.ad_link_1 },
     { url: adUrls.ad_url_2, link: adUrls.ad_link_2 }
-  ];
+  ], [adUrls]);
 
   return (
     <section id="main-ad" className="py-12 bg-neutral-900">
@@ -60,7 +62,7 @@ const MainAd: React.FC = () => {
         {adData.map((ad, idx) =>
           ad.url ? (
             <div
-              key={idx}
+              key={ad.url}
               className="w-full flex justify-center items-center"
               style={{ minWidth: 0 }}
             >
@@ -82,7 +84,7 @@ const MainAd: React.FC = () => {
                     {isImageUrl(ad.url) ? (
                       <img
                         src={ad.url}
-                        alt={`main-ad-img-${idx}`}
+                        alt={`Sponsor ad ${idx + 1}`}
                         style={{
                           width: '100%',
                           height: '100%',
@@ -93,11 +95,9 @@ const MainAd: React.FC = () => {
                       <iframe
                         src={getVimeoEmbedUrl(ad.url)}
                         allow="autoplay; fullscreen"
-                        allowFullScreen
-                        frameBorder={0}
                         className="w-full h-full"
                         title={`main-ad-${idx}`}
-                        style={{ pointerEvents: 'none' }}
+                        style={{ pointerEvents: 'none', border: 0 }}
                       />
                     )}
                   </a>
