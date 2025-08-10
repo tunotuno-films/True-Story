@@ -1,8 +1,10 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
-const BG_IMAGE_URL =
-  import.meta.env.VITE_BG_IMAGE_URL || ''; // Use environment variable
+const BG_IMAGE_URL = import.meta.env.VITE_BG_IMAGE_URL;
+if (!BG_IMAGE_URL) {
+  throw new Error('VITE_BG_IMAGE_URL is a required environment variable and was not provided.');
+}
 
 const Title: React.FC = () => {
   const scrollToSection = (sectionId: string) => {

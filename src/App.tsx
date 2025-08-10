@@ -15,6 +15,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import Seo from './components/Seo';
 import CountdownTimer from './components/CountdownTimer';
 import { seoKeywords } from './constants';
+import GoldAd from './components/GoldAd';
 
 function App() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -38,6 +39,7 @@ function App() {
         <MainAd />
         <Introduction />
         <Message />
+        <GoldAd />
         <TrueStory />
         <Artist onShowPrivacyPolicy={openPrivacyPolicy} />
         <Crowdfunding />
