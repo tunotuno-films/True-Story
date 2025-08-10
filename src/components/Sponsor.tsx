@@ -59,12 +59,14 @@ const MainSponsorCard: React.FC<{ sponsor: Sponsor }> = ({ sponsor }) => (
     </div>
     <div className="text-center md:text-left w-full max-w-64 mx-auto md:max-w-none md:mx-0">
       <h4 className="text-xl font-bold mb-2">{sponsor.name}</h4>
-      <p className="text-neutral-300 text-sm leading-relaxed">{sponsor.description}</p>
+      {sponsor.description && (
+        <p className="text-neutral-300 text-sm leading-relaxed">{sponsor.description}</p>
+      )}
     </div>
   </div>
 );
 
-const GoldSponsorCard: React.FC<{ sponsor: Sponsor; styles: any }> = ({ sponsor, styles }) => (
+const GoldSponsorCard: React.FC<{ sponsor: Sponsor; styles: typeof sizeClasses['md'] }> = ({ sponsor, styles }) => (
   <div className={`block text-center ${styles.card}`}>
     <div className={`flex items-center justify-center ${styles.logoContainer} mb-1`}>
       <a
@@ -83,15 +85,14 @@ const GoldSponsorCard: React.FC<{ sponsor: Sponsor; styles: any }> = ({ sponsor,
   </div>
 );
 
-const SilverSponsorCard: React.FC<{ sponsor: Sponsor; styles: any }> = ({ sponsor, styles }) => (
+const SilverSponsorCard: React.FC<{ sponsor: Sponsor; styles: typeof sizeClasses['sm'] }> = ({ sponsor, styles }) => (
   <a
-    key={sponsor.id}
     href={sponsor.website_url}
     target="_blank"
     rel="noopener noreferrer"
     className={`block text-center ${styles.card}`}
   >
-    <div className={`flex items-center justify-center ${styles.logoContainer} mb-1`}>
+    <div className={`flex items-center justify-center ${styles.logoContainer}`}>
       <img
         src={sponsor.logo_url}
         alt={sponsor.name}
@@ -104,7 +105,6 @@ const SilverSponsorCard: React.FC<{ sponsor: Sponsor; styles: any }> = ({ sponso
 
 const SupporterSponsorCard: React.FC<{ sponsor: Sponsor }> = ({ sponsor }) => (
   <a
-    key={sponsor.id}
     href={sponsor.website_url}
     target="_blank"
     rel="noopener noreferrer"
