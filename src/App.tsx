@@ -6,6 +6,7 @@ import Message from './components/Message';
 import TrueStory from './components/TrueStory';
 import Artist from './components/Artist';
 import News from './components/News';
+import MainAd from './components/MainAd';
 import Crowdfunding from './components/Project';
 import Contact from './components/Contact';
 import SponsorSection from './components/Sponsor';
@@ -34,6 +35,7 @@ function App() {
       <Title />
       <main>
         <News />
+        <MainAd />
         <Introduction />
         <Message />
         <TrueStory />
