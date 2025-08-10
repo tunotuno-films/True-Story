@@ -8,7 +8,7 @@ import Artist from './components/Artist';
 import News from './components/News';
 import Crowdfunding from './components/Project';
 import Contact from './components/Contact';
-import SponsorSection from './components/SponsorSection';
+import SponsorSection from './components/Sponsor';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import Seo from './components/Seo';
@@ -33,13 +33,13 @@ function App() {
       <Header />
       <Title />
       <main>
-        <SponsorSection />
         <News />
         <Introduction />
         <Message />
         <TrueStory />
         <Artist onShowPrivacyPolicy={openPrivacyPolicy} />
         <Crowdfunding />
+        <SponsorSection />
         <Contact onShowPrivacyPolicy={openPrivacyPolicy} />
       </main>
       <Footer onShowPrivacyPolicy={openPrivacyPolicy} />

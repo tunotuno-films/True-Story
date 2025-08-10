@@ -11,7 +11,7 @@ const Footer: React.FC<FooterProps> = ({ onShowPrivacyPolicy }) => {
         <button onClick={onShowPrivacyPolicy} className="hover:text-white transition-colors duration-300 mb-2">
           個人情報の取り扱いについて
         </button>
-        <p>&copy; {new Date().getFullYear()} True Story Project. All Rights Reserved.</p>
+        <p>&copy; {new Date().getFullYear()} True Story. All Rights Reserved.</p>
       </div>
     </footer>
   );
