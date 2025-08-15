@@ -112,9 +112,6 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
   };
 
   // プライバシーポリシー表示用の関数（propsから必ず受け取る）
-  const handlePrivacyClick = () => {
-    onShowPrivacyPolicy();
-  };
 
   return (
     <section id="truestory" className="py-20 md:py-32 bg-neutral-900">
