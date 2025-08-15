@@ -16,6 +16,7 @@ import Seo from './components/Seo';
 import CountdownTimer from './components/CountdownTimer';
 import { seoKeywords } from './constants';
 import GoldAd from './components/GoldAd';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -50,6 +51,7 @@ function App() {
 
       <CountdownTimer />
       {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
+      <Analytics />
     </div>
   );
 }
