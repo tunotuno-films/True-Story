@@ -247,7 +247,7 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
                     「送信する」ボタンを押すことにより、
                     <button
                       type="button"
-                      onClick={handlePrivacyClick}
+                      onClick={onShowPrivacyPolicy}
                       className="text-cyan-400 hover:underline"
                     >
                       個人情報の取り扱い

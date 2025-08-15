@@ -66,7 +66,7 @@ const Header: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             {/* 左端のタイトル */}
             <div className="text-white font-noto text-xl font-bold">
-              True Story
+              True Story【実話の物語】
             </div>
             
             {/* デスクトップ用メニュー (md以上で表示) */}

@@ -16,13 +16,13 @@ const Message: React.FC = () => {
           </div>
           <div className="md:w-2/3">
             <p className="font-noto text-base leading-loose text-neutral-300 mb-6">
-              この曲が生まれたきっかけは、ファンの方からいただいた一通の手紙でした。そこには、これまで誰にも話せなかったという、切なくも美しい実話が綴られていました。読んだ瞬間、心が震え、気づけばメロディを口ずさんでいました。
+              2022年のTrue Story【実話の物語】がスタートした当時、私はまだ大学生でした。映像制作が好きという気持ちだけで始めたこのプロジェクトは、多くの方に支えられて今に至ります。
             </p>
             <p className="font-noto text-base leading-loose text-neutral-300 mb-6">
-              この物語は、手紙をくれたその人だけのものではない。きっと多くの人が共感できる、普遍的な何かがあるはずだと感じています。
+              このTrue Story【実話の物語】は、その名の通り、実際にあった実話を基に制作します。決して同じストーリーは出てきません。
             </p>
             <p className="font-noto text-base leading-loose text-neutral-300">
-              だからこそ、このミュージックビデオは、僕たち制作者だけでなく、聴いてくれる皆さんと一緒に作り上げたい。あなたの力を貸してください。一緒に、忘れられない作品を作りましょう。
+              だからこそ、我々制作関係者だけではなく、音楽を聴いてくれる皆さんと、映像を観てくれる皆さんと一緒にストーリーを創りたいと思っています！
             </p>
             <p className="font-noto text-right mt-6 font-bold text-lg">Hiroki Ando</p>
           </div>

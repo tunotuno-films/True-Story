@@ -8,14 +8,16 @@ const Introduction: React.FC = () => {
         <p className="font-noto text-lg text-center mb-12">はじめに</p>
         <div className="max-w-4xl mx-auto">
           <h3 className="font-noto text-2xl md:text-4xl font-bold leading-relaxed mb-8">
-            誰かの心に眠る「実話」を、一本の映像作品に。
+            まだまだ知らない物語がそこにある。
           </h3>
           <p className="font-noto text-base md:text-lg leading-loose text-neutral-300">
-            私たちの誰もが、心の中に自分だけの物語を持っています。<br />
-            喜び、悲しみ、後悔、そして感謝。言葉にできずに、あるいは伝える相手もいないまま、ひっそりと仕舞われている記憶。<br /><br />
-            新曲「True Story」は、そんな誰かの実体験から生まれた楽曲です。<br />
-            このプロジェクトは、その歌の世界観を、最高品質のミュージックビデオとして形にすることを目指しています。<br /><br />
-            あなたの支援が、この物語に命を吹き込みます。
+            実話を基に楽曲制作・映像制作を行うTrue Story【実話の物語】は、2022年にスタートしましました。<br />
+            誰かの実話で、誰かが歌い、誰かが演じます。<br />
+            決まったマニュアルはありません。<br />
+            ０（スタート）状態から、多くの支援をいただき、制作関係者が100（完成）にします。<br />
+            だからこそ、美しいストーリー完成します。<br />
+            2026年夏、どのような作品が出来上がるのかまだ誰も知りません。<br />
+            私たちは挑戦します！
           </p>
         </div>
       </div>
