@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 
 const steps = [
 	{ label: '企画開始', description: '2025年8月', unlocked: false, details: ['コンセプト決定', 'チーム編成', '法務・権利確認'] },
@@ -36,35 +37,43 @@ const Schedule: React.FC = () => {
 						return (
 							<div
 								key={step.label}
-								className={[
+								className={clsx(
 									'relative rounded-2xl border p-5 transition overflow-hidden',
-									isDone && 'border-emerald-500/30 bg-emerald-500/5',
-									isCurrent && 'border-amber-400/30 bg-amber-400/5',
-									isFuture && 'border-neutral-700 bg-neutral-800/40',
-								].join(' ')}
+									{
+										'border-emerald-500/30 bg-emerald-500/5': isDone,
+										'border-amber-400/30 bg-amber-400/5': isCurrent,
+										'border-neutral-700 bg-neutral-800/40': isFuture,
+									}
+								)}
 							>
 								{/* 上部アクセントバー（図形感の強調） */}
 								<div
-									className={[
+									className={clsx(
 										'absolute top-0 left-0 h-1.5 w-full',
-										isDone && 'bg-gradient-to-r from-emerald-500 to-teal-500',
-										isCurrent && 'bg-gradient-to-r from-amber-400 to-yellow-400',
-										isFuture && 'bg-neutral-700',
-									].join(' ')}
+										{
+											'bg-gradient-to-r from-emerald-500 to-teal-500': isDone,
+											'bg-gradient-to-r from-amber-400 to-yellow-400': isCurrent,
+											'bg-neutral-700': isFuture,
+										}
+									)}
 								/>
 								{/* 角にデコ（図形のニュアンス） */}
-								<div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rotate-45 opacity-10"
-									style={{ background: isDone ? '#10B981' : isCurrent ? '#F59E0B' : '#525252' }} />
+								<div
+									className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rotate-45 opacity-10"
+									style={{ background: isDone ? '#10B981' : isCurrent ? '#F59E0B' : '#525252' }}
+								/>
 
 								{/* ヘッダー（番号/チェック＋ラベル） */}
 								<div className="flex items-center gap-3">
 									<div
-										className={[
+										className={clsx(
 											'flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold',
-											isDone && 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white',
-											isCurrent && 'bg-neutral-900 text-amber-300 border-2 border-amber-300',
-											isFuture && 'bg-neutral-700 text-neutral-400',
-										].join(' ')}
+											{
+												'bg-gradient-to-r from-emerald-500 to-teal-500 text-white': isDone,
+												'bg-neutral-900 text-amber-300 border-2 border-amber-300': isCurrent,
+												'bg-neutral-700 text-neutral-400': isFuture,
+											}
+										)}
 									>
 										{isDone ? (
 											<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -83,12 +92,14 @@ const Schedule: React.FC = () => {
 								{/* ステータスバッジ */}
 								<div className="mt-3">
 									<span
-										className={[
+										className={clsx(
 											'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold',
-											isDone && 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/20',
-											isCurrent && 'bg-amber-500/15 text-amber-300 ring-1 ring-amber-400/20',
-											isFuture && 'bg-neutral-700/50 text-neutral-400 ring-1 ring-white/10',
-										].join(' ')}
+											{
+												'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/20': isDone,
+												'bg-amber-500/15 text-amber-300 ring-1 ring-amber-400/20': isCurrent,
+												'bg-neutral-700/50 text-neutral-400 ring-1 ring-white/10': isFuture,
+											}
+										)}
 									>
 										{isDone ? '完了' : isCurrent ? '進行中' : '予定'}
 									</span>
@@ -99,8 +110,8 @@ const Schedule: React.FC = () => {
 									<div className="mt-3 rounded-lg border border-white/10 bg-neutral-900/40 p-3">
 										{Array.isArray(step.details) && step.details.length > 0 ? (
 											<ul className="list-disc list-inside space-y-1 text-sm text-neutral-300">
-												{step.details.map((d: string, i: number) => (
-													<li key={i}>{d}</li>
+												{step.details.map((d: string) => (
+													<li key={d}>{d}</li>
 												))}
 											</ul>
 										) : (

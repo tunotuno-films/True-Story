@@ -11,6 +11,8 @@ const Header: React.FC = () => {
   const [latestVotes, setLatestVotes] = useState<Vote[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const animationRef = useRef<HTMLDivElement>(null);
+  const [applyWillChange, setApplyWillChange] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const fetchLatestVotes = useCallback(async () => {
     console.log('Fetching latest votes...');
@@ -62,6 +64,32 @@ const Header: React.FC = () => {
     { id: 'crowdfunding', label: 'PROJECT' },
     { id: 'contact', label: 'CONTACT' },
   ];
+
+  // reduce設定を監視
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setPrefersReducedMotion(mq.matches);
+    update();
+    mq.addEventListener?.('change', update);
+    return () => mq.removeEventListener?.('change', update);
+  }, []);
+
+  // 表示中のみwill-changeを有効化
+  useEffect(() => {
+    const el = animationRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // 要素が表示領域に入っていて、reduceでない、かつメッセージがある場合のみ有効化
+        setApplyWillChange(entry.isIntersecting && !prefersReducedMotion && latestVotes.length > 0);
+      },
+      { root: null, threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [latestVotes.length, prefersReducedMotion]);
 
   return (
     <header className="sticky top-0 z-50">
@@ -133,7 +161,7 @@ const Header: React.FC = () => {
           </div>
         </div>
       </nav>
-      
+
       {/* 応援メッセージセクション */}
       <div className="relative z-10 py-2 overflow-hidden isolate">
         {/* 背景レイヤー（内容と分離） */}
@@ -149,7 +177,7 @@ const Header: React.FC = () => {
                 ref={animationRef}
                 className="flex animate-scroll-left whitespace-nowrap text-white transform-gpu"
                 onAnimationIteration={handleAnimationIteration}
-                style={{ willChange: 'transform' }}
+                style={{ willChange: applyWillChange ? 'transform' : undefined }}
               >
                 {latestVotes
                   .filter(vote => vote.message && vote.message.trim() !== '')
