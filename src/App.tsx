@@ -17,6 +17,7 @@ import CountdownTimer from './components/CountdownTimer';
 import { seoKeywords } from './constants';
 import GoldAd from './components/GoldAd';
 import { Analytics } from '@vercel/analytics/react';
+import Schedule from './components/Schedule';
 
 function App() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -27,8 +28,8 @@ function App() {
   return (
     <div className="bg-black">
       <Seo
-        title="True Story【実話の物語】"
-        description="寄せられた実話をもとに、心に響く物語を映像化します。あなたの支援が、この物語に命を吹き込みます。"
+        title="True Story【実話の物語】| これは、あなたの物語かもしれない。"
+        description="実話を基に楽曲制作・映像制作を行うTrue Story【実話の物語】。誰かの実話で、誰かが歌い、誰かが演じます。決まったマニュアルはありません。"
         keywords={seoKeywords}
         url={import.meta.env.VITE_APP_BASE_URL || 'http://localhost:5173'}
       />
@@ -40,6 +41,7 @@ function App() {
         <MainAd />
         <Introduction />
         <Message />
+        <Schedule />
         <GoldAd />
         <TrueStory onShowPrivacyPolicy={openPrivacyPolicy} />
         <Artist onShowPrivacyPolicy={openPrivacyPolicy} />

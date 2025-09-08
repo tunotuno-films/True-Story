@@ -49,6 +49,10 @@ const Header: React.FC = () => {
     setIsMenuOpen(false);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const navItems = [
     { id: 'introduction', label: 'INTRODUCTION' },
     { id: 'message', label: 'MESSAGE' },
@@ -65,7 +69,10 @@ const Header: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* 左端のタイトル */}
-            <div className="text-white font-noto text-xl font-bold">
+            <div
+              className="text-white font-noto text-xl font-bold cursor-pointer"
+              onClick={scrollToTop}
+            >
               True Story【実話の物語】
             </div>
             
@@ -128,14 +135,21 @@ const Header: React.FC = () => {
       </nav>
       
       {/* 応援メッセージセクション */}
-      <div className="bg-gray-800/30 backdrop-blur-sm py-2 overflow-hidden relative z-10">
-        <div className="container mx-auto px-6 md:px-12">
-          <div className="max-w-6xl mx-auto">
+      <div className="relative z-10 py-2 overflow-hidden isolate">
+        {/* 背景レイヤー（内容と分離） */}
+        <div
+          className="absolute inset-0 bg-gray-800/30 backdrop-blur-sm pointer-events-none"
+          aria-hidden="true"
+          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+        />
+        <div className="container mx-auto px-6 md:px-12 relative">
+          <div className="max-w-6xl mx-auto min-h-[44px]">
             {latestVotes.length > 0 && (
-              <div 
+              <div
                 ref={animationRef}
-                className="flex animate-scroll-left whitespace-nowrap text-white"
+                className="flex animate-scroll-left whitespace-nowrap text-white transform-gpu"
                 onAnimationIteration={handleAnimationIteration}
+                style={{ willChange: 'transform' }}
               >
                 {latestVotes
                   .filter(vote => vote.message && vote.message.trim() !== '')
