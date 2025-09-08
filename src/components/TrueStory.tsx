@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface TrueStoryProps {
   onShowPrivacyPolicy: () => void;
@@ -22,6 +22,13 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
 
   const localStorageKey = 'trueStoryDraft';
+
+  // エラー表示のヘルパー
+  const showErrorWithTimeout = (message: string) => {
+    setErrorMessage(message);
+    setShowError(true);
+    setTimeout(() => setShowError(false), 3000);
+  };
 
   // GoogleフォームのID
   const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScNvtbhGpynHbYUfvGvLHLo2MKSxsBLYDkNewyHHGDD3X7zPg/formResponse';
@@ -47,21 +54,35 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
     localStorage.setItem(localStorageKey, newStory);
   };
 
-  // 募集要項PDFのスクロール末尾を検知
-  const handleGuidelinesScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    if (!hasViewedGuidelines && el.scrollTop + el.clientHeight >= el.scrollHeight - 8) {
-      setHasViewedGuidelines(true);
+  // スクロールイベントのdebounce用
+  const scrollDebounceRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (scrollDebounceRef.current) {
+        clearTimeout(scrollDebounceRef.current);
+      }
+    };
+  }, []);
+
+  // 募集要項PDFのスクロール末尾を検知（debounce付き）
+  const handleGuidelinesScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    if (scrollDebounceRef.current) {
+      clearTimeout(scrollDebounceRef.current);
     }
-  };
+    const el = e.currentTarget; // イベント内で参照を退避
+    scrollDebounceRef.current = window.setTimeout(() => {
+      if (!hasViewedGuidelines && el.scrollTop + el.clientHeight >= el.scrollHeight - 8) {
+        setHasViewedGuidelines(true);
+      }
+    }, 100);
+  }, [hasViewedGuidelines]);
 
   // メイン送信ボタン押下時
   const handleMainSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!story.trim()) {
-      setErrorMessage('フォームを入力してください。');
-      setShowError(true);
-      setTimeout(() => setShowError(false), 3000); // 3秒後に自動で非表示
+      showErrorWithTimeout('フォームを入力してください。');
       return;
     }
     setShowFormModal(true);
@@ -73,21 +94,15 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
     // メールアドレス型チェック
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!nickname.trim() || !email.trim() || !age || !gender) {
-      setErrorMessage('すべての項目を入力してください。');
-      setShowError(true);
-      setTimeout(() => setShowError(false), 3000);
+      showErrorWithTimeout('すべての項目を入力してください。');
       return;
     }
     if (age === '10代' && !parentalConsent) {
-      setErrorMessage('10代の方は親の同意が必要です。');
-      setShowError(true);
-      setTimeout(() => setShowError(false), 3000);
+      showErrorWithTimeout('10代の方は親の同意が必要です。');
       return;
     }
     if (!emailPattern.test(email)) {
-      setErrorMessage('正しいメールアドレスを入力してください。');
-      setShowError(true);
-      setTimeout(() => setShowError(false), 3000);
+      showErrorWithTimeout('正しいメールアドレスを入力してください。');
       return;
     }
     setIsSubmitting(true);
@@ -177,11 +192,11 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
             <h3 className="text-2xl font-bold mb-4">送信ありがとうございます！</h3>
             <p>あなたの物語が、誰かの心を動かすかもしれません。</p>
             <button
-    onClick={() => setIsSubmitted(false)}
-      className="mt-6 bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-6 rounded-full transition-colors"
-    >
-      もう一度送信する
-    </button>
+              onClick={() => setIsSubmitted(false)}
+              className="mt-6 bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-6 rounded-full transition-colors"
+            >
+              もう一度送信する
+            </button>
           </div>
         ) : (
           <form onSubmit={handleMainSubmit}>
