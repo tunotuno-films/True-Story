@@ -23,6 +23,8 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
   const [staff, setStaff] = useState<Artist[]>([]);
   const [voteCounts, setVoteCounts] = useState<VoteCount[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userType, setUserType] = useState<'individual' | 'sponsor' | null>(null);
+  const [showSponsorMessage, setShowSponsorMessage] = useState(false);
 
   const fetchArtists = useCallback(async () => {
     const { data, error } = await supabase
@@ -45,15 +47,63 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
     }
   }, []);
 
+  const checkUserType = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        setUserType(null);
+        return;
+      }
+
+      // individual_membersテーブルをチェック
+      const { data: individualMember } = await supabase
+        .from('individual_members')
+        .select('id')
+        .eq('auth_user_id', session.user.id)
+        .single();
+
+      if (individualMember) {
+        setUserType('individual');
+        return;
+      }
+
+      // sponsor_membersテーブルをチェック
+      const { data: sponsorMember } = await supabase
+        .from('sponsor_members')
+        .select('id')
+        .eq('auth_user_id', session.user.id)
+        .single();
+
+      if (sponsorMember) {
+        setUserType('sponsor');
+        return;
+      }
+
+      setUserType(null);
+    } catch (error) {
+      console.error('Error checking user type:', error);
+      setUserType(null);
+    }
+  }, []);
+
   useEffect(() => {
     fetchArtists();
     fetchVoteCounts();
-  }, [fetchArtists, fetchVoteCounts]);
+    checkUserType();
+  }, [fetchArtists, fetchVoteCounts, checkUserType]);
 
   const handleModalClose = (voteSubmitted: boolean) => {
     setIsModalOpen(false);
     if (voteSubmitted) {
       fetchVoteCounts();
+    }
+  };
+
+  const handleVoteButtonClick = () => {
+    if (userType === 'sponsor') {
+      setShowSponsorMessage(true);
+    } else {
+      setIsModalOpen(true);
     }
   };
 
@@ -107,7 +157,7 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
           </div>
           <div className="text-center mt-16">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleVoteButtonClick}
               className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg"
             >
               投票する
@@ -120,6 +170,41 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
           </div>
         </div>
       </section>
+
+      {/* スポンサーメッセージモーダル */}
+      {showSponsorMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-neutral-800 rounded-lg p-8 max-w-md mx-4 relative">
+            <button
+              onClick={() => setShowSponsorMessage(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-white text-xl"
+            >
+              ×
+            </button>
+            
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white mb-6">
+                投票確認
+              </h2>
+              
+              <div className="bg-orange-600 text-white p-4 rounded-lg mb-6">
+                <p>
+                  スポンサーアカウントでは投票できません。<br />
+                  投票は一般ユーザーアカウントでのみ可能です。
+                </p>
+              </div>
+              
+              <button
+                onClick={() => setShowSponsorMessage(false)}
+                className="bg-neutral-600 hover:bg-neutral-700 text-white px-6 py-2 rounded-md transition duration-200"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <VoteModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
