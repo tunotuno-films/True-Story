@@ -178,9 +178,20 @@ export const robustSignOut = async () => {
       } else if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
         const metaEnv = (import.meta as any).env;
         supabaseUrl = metaEnv.VITE_SUPABASE_URL || metaEnv.REACT_APP_SUPABASE_URL || metaEnv.SUPABASE_URL || '';
-      } else if ((supabase as any)?.url) {
-        // 予備: supabase クライアントに URL が格納されていれば使用
-        supabaseUrl = (supabase as any).url || '';
+      } else {
+        // 予備: supabase クライアント内部に URL が存在する可能性があるためいくつかの候補を試す
+        // ただしライブラリの内部構造に依存するのは脆弱なので、可能なら
+        // src/lib/supabaseClient.ts で supabaseUrl をエクスポートしてそれを import する方が確実です。
+        const supabaseAny = supabase as any;
+        if (supabaseAny?.supabaseUrl) {
+          supabaseUrl = supabaseAny.supabaseUrl;
+        } else if (supabaseAny?.url) {
+          supabaseUrl = supabaseAny.url;
+        } else if (supabaseAny?._supabaseUrl) {
+          supabaseUrl = supabaseAny._supabaseUrl;
+        } else {
+          supabaseUrl = '';
+        }
       }
 
       supabaseUrl = supabaseUrl.replace(/\/$/, '');
