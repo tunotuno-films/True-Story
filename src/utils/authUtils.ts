@@ -198,9 +198,21 @@ export const robustSignOut = async () => {
 
       if (supabaseUrl && typeof window !== 'undefined') {
         const redirectTo = window.location.origin || `${window.location.protocol}//${window.location.host}`;
-        const logoutUrl = `${supabaseUrl}/auth/v1/logout?redirect_to=${encodeURIComponent(redirectTo)}`;
+
+        // 環境変数から anon key を取得（ビルド時に設定していることが前提）
+        let anonKey = '';
+        if (typeof process !== 'undefined' && process?.env?.REACT_APP_SUPABASE_ANON_KEY) {
+          anonKey = String(process.env.REACT_APP_SUPABASE_ANON_KEY);
+        } else if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
+          const metaEnv = (import.meta as any).env;
+          anonKey = metaEnv.VITE_SUPABASE_ANON_KEY || metaEnv.REACT_APP_SUPABASE_ANON_KEY || metaEnv.SUPABASE_ANON_KEY || '';
+        }
+
+        // logout エンドポイントに apikey が必要（公開キー）なので、存在すればクエリに追加する
+        const apikeyParam = anonKey ? `&apikey=${encodeURIComponent(anonKey)}` : '';
+        const logoutUrl = `${supabaseUrl}/auth/v1/logout?redirect_to=${encodeURIComponent(redirectTo)}${apikeyParam}`;
         console.info('[authUtils] redirecting to Supabase logout endpoint:', logoutUrl);
-        // 強制的にブラウザを遷移させ、サーバ側クッキーを破棄してから戻す
+        // ブラウザ遷移でサーバ側クッキーを破棄してから戻す
         window.location.href = logoutUrl;
         return; // リダイレクトするのでここで終了
       }
