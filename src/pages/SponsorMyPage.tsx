@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { robustSignOut } from '../utils/authUtils';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PrivacyPolicy from '../components/PrivacyPolicy';
@@ -107,22 +108,14 @@ const SponsorMyPage: React.FC = () => {
   const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
+  // 注意:
+  // サインアウト処理は IndividualMyPage や AuthForm などと重複しやすいため、
+  // 共通ユーティリティ `robustSignOut` を使ってサーバ側の signOut が失敗した場合でも
+  // クライアント側のセッション情報（localStorage）をクリアするようにしています。
+  // 将来別の箇所でサインアウト処理を追加する場合は `robustSignOut` を再利用してください。
   const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.warn('Supabase signOut returned error:', error);
-      }
-    } catch (err) {
-      console.warn('Supabase signOut threw error:', err);
-    } finally {
-      try {
-        Object.keys(localStorage).forEach((k) => {
-          if (k.toLowerCase().includes('supabase')) localStorage.removeItem(k);
-        });
-      } catch (e) { /* ignore */ }
-      window.location.href = '/';
-    }
+    await robustSignOut();
+    window.location.href = '/';
   };
 
   if (isLoading && !showMinimalLoader) {

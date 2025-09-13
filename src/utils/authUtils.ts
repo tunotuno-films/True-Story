@@ -137,3 +137,25 @@ export const handleGoogleAuth = async () => {
     console.error('Unexpected error during Google auth:', err);
   }
 };
+
+// 追加: 冗長なサインアウト処理を共通化
+export const robustSignOut = async () => {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.warn('Supabase signOut returned error:', error);
+    }
+  } catch (err) {
+    console.warn('Supabase signOut threw error:', err);
+  } finally {
+    try {
+      Object.keys(localStorage).forEach((k) => {
+        if (k.toLowerCase().includes('supabase')) {
+          localStorage.removeItem(k);
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to clear supabase localStorage items.', e);
+    }
+  }
+};
