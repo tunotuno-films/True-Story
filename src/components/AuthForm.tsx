@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import IndividualAuthForm from './IndividualAuthForm';
 import SponsorAuthForm from './SponsorAuthForm';
 import type { AuthFormProps, AuthFormData } from '../types/auth';
-import { handleGoogleAuth, checkMemberExists, generateYears, generateMonths, generateDays } from '../utils/authUtils';
+import { handleGoogleAuth, checkMemberExists, generateYears, generateMonths, generateDays, robustSignOut } from '../utils/authUtils';
 
 const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signin' }) => {
   const [mode, setMode] = useState<'usertype' | 'individual' | 'sponsor' | 'signin'>('signin');
@@ -268,22 +268,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
   };
 
   const handleCancelGoogleAuth = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.warn('Supabase signOut returned error (cancel):', error);
-      }
-    } catch (err) {
-      console.warn('Supabase signOut threw error (cancel):', err);
-    } finally {
-      try {
-        Object.keys(localStorage).forEach((k) => {
-          if (k.toLowerCase().includes('supabase')) localStorage.removeItem(k);
-        });
-      } catch (e) { /* ignore */ }
-      setShowAdditionalInfoForm(false);
-      setGoogleUser(null);
-    }
+    await robustSignOut();
+    setShowAdditionalInfoForm(false);
+    setGoogleUser(null);
   };
 
   if (isCheckingMember) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { robustSignOut } from '../utils/authUtils';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PrivacyPolicy from '../components/PrivacyPolicy';
@@ -157,23 +158,8 @@ const IndividualMyPage: React.FC = () => {
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
   const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.warn('Supabase signOut returned error:', error);
-      }
-    } catch (err) {
-      console.warn('Supabase signOut threw error:', err);
-    } finally {
-      // クライアント側のsupabase関連のlocalStorageをクリア（保険）
-      try {
-        Object.keys(localStorage).forEach((k) => {
-          if (k.toLowerCase().includes('supabase')) localStorage.removeItem(k);
-        });
-      } catch (e) { /* ignore */ }
-      // クライアント側を確実にログアウト状態にしてルートへ遷移
-      window.location.href = '/';
-    }
+    await robustSignOut();
+    window.location.href = '/';
   };
 
   if (isLoading && !showMinimalLoader) {
@@ -316,4 +302,5 @@ const IndividualMyPage: React.FC = () => {
     </div>
   );
 };
+
 export default IndividualMyPage;
