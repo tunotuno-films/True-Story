@@ -167,58 +167,8 @@ export const robustSignOut = async () => {
       }
     }
 
-    // フォールバック:
-    // サーバ側に残る httpOnly クッキーを確実に破棄するため、
-    // Supabase の /auth/v1/logout にリダイレクトする（redirect_to に戻り先を指定）
-    // 環境変数または import.meta.env から supabase URL を取得する
-    try {
-      let supabaseUrl = '';
-      if (typeof process !== 'undefined' && process?.env?.REACT_APP_SUPABASE_URL) {
-        supabaseUrl = String(process.env.REACT_APP_SUPABASE_URL);
-      } else if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
-        const metaEnv = (import.meta as any).env;
-        supabaseUrl = metaEnv.VITE_SUPABASE_URL || metaEnv.REACT_APP_SUPABASE_URL || metaEnv.SUPABASE_URL || '';
-      } else {
-        // 予備: supabase クライアント内部に URL が存在する可能性があるためいくつかの候補を試す
-        // ただしライブラリの内部構造に依存するのは脆弱なので、可能なら
-        // src/lib/supabaseClient.ts で supabaseUrl をエクスポートしてそれを import する方が確実です。
-        const supabaseAny = supabase as any;
-        if (supabaseAny?.supabaseUrl) {
-          supabaseUrl = supabaseAny.supabaseUrl;
-        } else if (supabaseAny?.url) {
-          supabaseUrl = supabaseAny.url;
-        } else if (supabaseAny?._supabaseUrl) {
-          supabaseUrl = supabaseAny._supabaseUrl;
-        } else {
-          supabaseUrl = '';
-        }
-      }
-
-      supabaseUrl = supabaseUrl.replace(/\/$/, '');
-
-      if (supabaseUrl && typeof window !== 'undefined') {
-        const redirectTo = window.location.origin || `${window.location.protocol}//${window.location.host}`;
-
-        // 環境変数から anon key を取得（ビルド時に設定していることが前提）
-        let anonKey = '';
-        if (typeof process !== 'undefined' && process?.env?.REACT_APP_SUPABASE_ANON_KEY) {
-          anonKey = String(process.env.REACT_APP_SUPABASE_ANON_KEY);
-        } else if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
-          const metaEnv = (import.meta as any).env;
-          anonKey = metaEnv.VITE_SUPABASE_ANON_KEY || metaEnv.REACT_APP_SUPABASE_ANON_KEY || metaEnv.SUPABASE_ANON_KEY || '';
-        }
-
-        // logout エンドポイントに apikey が必要（公開キー）なので、存在すればクエリに追加する
-        const apikeyParam = anonKey ? `&apikey=${encodeURIComponent(anonKey)}` : '';
-        const logoutUrl = `${supabaseUrl}/auth/v1/logout?redirect_to=${encodeURIComponent(redirectTo)}${apikeyParam}`;
-        console.info('[authUtils] redirecting to Supabase logout endpoint:', logoutUrl);
-        // ブラウザ遷移でサーバ側クッキーを破棄してから戻す
-        window.location.href = logoutUrl;
-        return; // リダイレクトするのでここで終了
-      }
-    } catch (e) {
-      console.warn('Failed to perform supabase logout redirect fallback:', e);
-    }
-    // フォールバックが行えない場合は何もしない（呼び出し側でナビゲート処理を行う）
+    // The redirect fallback was removed because it was causing a 405 error
+    // by making a GET request to a POST-only endpoint.
+    // supabase.auth.signOut() should be sufficient.
   }
 };
