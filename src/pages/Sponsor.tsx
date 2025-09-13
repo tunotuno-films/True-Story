@@ -38,7 +38,7 @@ const SponsorMyPage: React.FC = () => {
         loadingTimeout = setTimeout(() => {
           if (!hasCompletedCheck) {
             console.log('Loading timeout - redirecting to main mypage');
-            navigate('/mypage');
+            navigate('/users');
             hasCompletedCheck = true;
           }
         }, 3000);
@@ -66,12 +66,12 @@ const SponsorMyPage: React.FC = () => {
           } else {
             // スポンサー会員でない場合は通常のマイページにリダイレクト
             console.log('Not a sponsor member, redirecting to main mypage');
-            navigate('/mypage');
+            navigate('/users');
             return;
           }
         } else {
           // 未ログインの場合は通常のマイページにリダイレクト
-          navigate('/mypage');
+          navigate('/users');
           return;
         }
         
@@ -85,7 +85,7 @@ const SponsorMyPage: React.FC = () => {
         hasCompletedCheck = true;
         clearTimeout(loadingTimeout);
         clearTimeout(minimalLoaderTimeout);
-        navigate('/mypage');
+        navigate('/users');
       }
     };
 
@@ -99,7 +99,7 @@ const SponsorMyPage: React.FC = () => {
             isSigningOut.current = false;
             return;
           }
-          navigate('/mypage');
+          navigate('/users');
         }
       }
     );

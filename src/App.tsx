@@ -13,15 +13,16 @@ import Contact from './components/Contact';
 import SponsorSection from './components/Sponsor';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
-import MyPage from './pages/MyPage';
-import SponsorMyPage from './pages/SponsorMyPage';
-import IndividualMyPage from './pages/IndividualMyPage';
+import MyPage from './pages/User';
+import SponsorMyPage from './pages/Sponsor';
+import IndividualMyPage from './pages/Member';
 import Seo from './components/Seo';
 import CountdownTimer from './components/CountdownTimer';
 import { seoKeywords } from './constants';
 import GoldAd from './components/GoldAd';
 import { Analytics } from '@vercel/analytics/react';
 import Schedule from './components/Schedule';
+import SocialLinks from './components/SocialLinks';
 
 function App() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -56,6 +57,9 @@ function App() {
       </main>
       <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
 
+      {/* 右側に縦並びのSNSリンクを表示 */}
+      <SocialLinks />
+
       <CountdownTimer />
       {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
     </div>
@@ -65,9 +69,9 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<MainPage />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/mypage/individual" element={<IndividualMyPage />} />
-        <Route path="/mypage/sponsor" element={<SponsorMyPage />} />
+        <Route path="/users" element={<MyPage />} />
+        <Route path="/users/member" element={<IndividualMyPage />} />
+        <Route path="/users/sponsor" element={<SponsorMyPage />} />
       </Routes>
       <Analytics />
     </Router>

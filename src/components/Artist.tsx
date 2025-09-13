@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import VoteModal from './VoteModal';
 import { supabase } from '../lib/supabaseClient';
-import VoteStatusGraph from './VoteStatusGraph';
 
 interface Artist {
   id: string;
@@ -162,11 +161,6 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
             >
               投票する
             </button>
-          </div>
-
-          <div className="mt-20 max-w-4xl mx-auto">
-            <h3 className="text-3xl text-center mb-8 gradient-text">現在の投票状況</h3>
-            <VoteStatusGraph voteData={artistVoteData} />
           </div>
         </div>
       </section>
