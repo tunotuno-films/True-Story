@@ -113,6 +113,21 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
   // 初回ロード時の現在セッションチェックも追加
   useEffect(() => {
     const checkCurrentSession = async () => {
+      // OAuth リダイレクトで付与されるハッシュを消して URL をクリーンにする
+      try {
+        if (
+          window.location.hash &&
+          (window.location.hash.includes('access_token') ||
+            window.location.hash.includes('error') ||
+            window.location.hash.includes('provider_token'))
+        ) {
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        }
+      } catch (e) {
+        console.warn('Failed to replace history state', e);
+      }
+
+      // 既存のセッションチェック処理
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const user = session.user;

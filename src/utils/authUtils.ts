@@ -82,29 +82,43 @@ export const checkMemberExists = async (userId: string) => {
 };
 
 export const getRedirectURL = () => {
-  // 環境変数が設定されている場合はそれを使用
-  if (process.env.REACT_APP_SITE_URL) {
-    return process.env.REACT_APP_SITE_URL;
+  // 1) process.env が使える場合（CRAなどでビルド時に埋め込まれる）
+  if (typeof process !== 'undefined' && process?.env?.REACT_APP_SITE_URL) {
+    return String(process.env.REACT_APP_SITE_URL).replace(/\/$/, '');
   }
-  
-  // フォールバック: ホスト名で判定
-  const isProduction = window.location.hostname === 'www.truestory.jp';
+
+  // 2) Vite 等の import.meta.env を使っている場合
+  if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
+    const metaEnv = (import.meta as any).env;
+    if (metaEnv.VITE_SITE_URL) return String(metaEnv.VITE_SITE_URL).replace(/\/$/, '');
+    if (metaEnv.REACT_APP_SITE_URL) return String(metaEnv.REACT_APP_SITE_URL).replace(/\/$/, '');
+    if (metaEnv.SITE_URL) return String(metaEnv.SITE_URL).replace(/\/$/, '');
+  }
+
+  // 3) フォールバック：ホスト名で判定
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const isProduction = hostname === 'www.truestory.jp' || hostname === 'truestory.jp';
   return isProduction ? 'https://www.truestory.jp' : 'http://localhost:3000';
 };
 
 export const handleGoogleAuth = async () => {
-  const redirectTo = getRedirectURL();
-  
+  const base = getRedirectURL();
+  const redirectTo = `${base.replace(/\/$/, '')}/mypage`; // 認証後は /mypage に戻す
+
   console.log('Google auth redirect URL:', redirectTo);
-  
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: redirectTo
+
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectTo
+      }
+    });
+
+    if (error) {
+      console.error('Google auth error:', error);
     }
-  });
-  
-  if (error) {
-    console.error('Google auth error:', error);
+  } catch (err) {
+    console.error('Unexpected error during Google auth:', err);
   }
 };
