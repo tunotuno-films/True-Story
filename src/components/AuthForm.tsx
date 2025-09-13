@@ -269,11 +269,20 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
 
   const handleCancelGoogleAuth = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.warn('Supabase signOut returned error (cancel):', error);
+      }
+    } catch (err) {
+      console.warn('Supabase signOut threw error (cancel):', err);
+    } finally {
+      try {
+        Object.keys(localStorage).forEach((k) => {
+          if (k.toLowerCase().includes('supabase')) localStorage.removeItem(k);
+        });
+      } catch (e) { /* ignore */ }
       setShowAdditionalInfoForm(false);
       setGoogleUser(null);
-    } catch (error) {
-      console.error('Sign out error:', error);
     }
   };
 

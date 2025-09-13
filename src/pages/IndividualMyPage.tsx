@@ -157,8 +157,23 @@ const IndividualMyPage: React.FC = () => {
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.warn('Supabase signOut returned error:', error);
+      }
+    } catch (err) {
+      console.warn('Supabase signOut threw error:', err);
+    } finally {
+      // クライアント側のsupabase関連のlocalStorageをクリア（保険）
+      try {
+        Object.keys(localStorage).forEach((k) => {
+          if (k.toLowerCase().includes('supabase')) localStorage.removeItem(k);
+        });
+      } catch (e) { /* ignore */ }
+      // クライアント側を確実にログアウト状態にしてルートへ遷移
+      window.location.href = '/';
+    }
   };
 
   if (isLoading && !showMinimalLoader) {

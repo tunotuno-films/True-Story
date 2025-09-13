@@ -108,8 +108,21 @@ const SponsorMyPage: React.FC = () => {
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.warn('Supabase signOut returned error:', error);
+      }
+    } catch (err) {
+      console.warn('Supabase signOut threw error:', err);
+    } finally {
+      try {
+        Object.keys(localStorage).forEach((k) => {
+          if (k.toLowerCase().includes('supabase')) localStorage.removeItem(k);
+        });
+      } catch (e) { /* ignore */ }
+      window.location.href = '/';
+    }
   };
 
   if (isLoading && !showMinimalLoader) {
