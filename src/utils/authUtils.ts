@@ -82,12 +82,12 @@ export const checkMemberExists = async (userId: string) => {
 };
 
 export const getRedirectURL = () => {
-  // 1) process.env が使える場合（CRAなどでビルド時に埋め込まれる）
+  // 1) ローカル開発用に明示的な env を優先（.env.local に設定してください）
   if (typeof process !== 'undefined' && process?.env?.REACT_APP_SITE_URL) {
     return String(process.env.REACT_APP_SITE_URL).replace(/\/$/, '');
   }
 
-  // 2) Vite 等の import.meta.env を使っている場合
+  // 2) Vite 等の import.meta.env をチェック（デプロイ環境）
   if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
     const metaEnv = (import.meta as any).env;
     if (metaEnv.VITE_SITE_URL) return String(metaEnv.VITE_SITE_URL).replace(/\/$/, '');
@@ -95,23 +95,38 @@ export const getRedirectURL = () => {
     if (metaEnv.SITE_URL) return String(metaEnv.SITE_URL).replace(/\/$/, '');
   }
 
-  // 3) フォールバック：ホスト名で判定
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  const isProduction = hostname === 'www.truestory.jp' || hostname === 'truestory.jp';
-  return isProduction ? 'https://www.truestory.jp' : 'http://localhost:3000';
+  // 3) ブラウザ実行時かつローカルホストなら現在の origin を最優先（ポートも含む）
+  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+    const hostname = window.location.hostname;
+    const origin = String(window.location.origin).replace(/\/$/, '');
+    if (
+      hostname.includes('localhost') ||
+      hostname.startsWith('127.') ||
+      hostname === '::1'
+    ) {
+      return origin;
+    }
+  }
+
+  // 4) 最後のフォールバックは本番URL
+  return 'https://www.truestory.jp';
 };
 
 export const handleGoogleAuth = async () => {
   const base = getRedirectURL();
   const redirectTo = `${base.replace(/\/$/, '')}/mypage`; // 認証後は /mypage に戻す
 
-  console.log('Google auth redirect URL:', redirectTo);
+  // デバッグログを強化：Supabase に渡す redirectTo を明示表示します
+  console.info('[authUtils] Google auth redirectTo ->', redirectTo);
 
   try {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectTo
+        redirectTo: redirectTo,
+        queryParams: {
+          prompt: 'select_account'
+        }
       }
     });
 
