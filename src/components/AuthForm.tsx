@@ -113,18 +113,36 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
   // 初回ロード時の現在セッションチェックも追加
   useEffect(() => {
     const checkCurrentSession = async () => {
-      // OAuth リダイレクトで付与されるハッシュを消して URL をクリーンにする
+      // OAuth リダイレクトで付与されるハッシュがある場合、supabase に処理させる
       try {
         if (
+          typeof window !== 'undefined' &&
           window.location.hash &&
           (window.location.hash.includes('access_token') ||
             window.location.hash.includes('error') ||
             window.location.hash.includes('provider_token'))
         ) {
-          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+          console.log('AuthForm - processing auth callback from URL hash');
+          try {
+            // supabase-js v2 does not expose getSessionFromUrl; use getSession to obtain the current session instead
+            const { data, error } = await supabase.auth.getSession();
+            if (error) {
+              console.warn('getSession error:', error);
+            } else {
+              console.log('getSession data:', data);
+            }
+          } catch (e) {
+            console.error('Error calling getSession:', e);
+          }
+          // URLのハッシュを消してクリーンにする
+          try {
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+          } catch (e) {
+            console.warn('Failed to replace history state', e);
+          }
         }
       } catch (e) {
-        console.warn('Failed to replace history state', e);
+        console.error('Error handling auth callback hash:', e);
       }
 
       // 既存のセッションチェック処理
