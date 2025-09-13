@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { robustSignOut } from '../utils/authUtils';
@@ -21,6 +21,7 @@ const IndividualMyPage: React.FC = () => {
   const [voteHistory, setVoteHistory] = useState<any[]>([]);
   const [isLoadingVotes, setIsLoadingVotes] = useState(false);
   const navigate = useNavigate();
+  const isSigningOut = useRef(false);
 
   // 投票履歴を取得する関数
   const fetchVoteHistory = async (authUserId: string) => {
@@ -141,7 +142,13 @@ const IndividualMyPage: React.FC = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event) => {
+        // ローカルで signOut を開始した場合はこのリスナー側のナビゲーションを無視する
         if (event === 'SIGNED_OUT') {
+          if (isSigningOut.current) {
+            // フラグをリセットして早期終了（handleSignOut 側で navigate('/') を実行済み）
+            isSigningOut.current = false;
+            return;
+          }
           navigate('/mypage');
         }
       }
@@ -158,8 +165,11 @@ const IndividualMyPage: React.FC = () => {
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
   const handleSignOut = async () => {
+    // 自前のサインアウトフロー中であることを示すフラグ
+    isSigningOut.current = true;
     await robustSignOut();
-    window.location.href = '/';
+    // SPA のナビゲーションを使用（ページ全体のリロードを避ける）
+    navigate('/');
   };
 
   if (isLoading && !showMinimalLoader) {
