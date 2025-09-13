@@ -23,11 +23,28 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
 
   const localStorageKey = 'trueStoryDraft';
 
-  // エラー表示のヘルパー
+  // エラー表示タイマー管理
+  const errorTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // エラー表示のヘルパー（競合防止）
   const showErrorWithTimeout = (message: string) => {
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
     setErrorMessage(message);
     setShowError(true);
-    setTimeout(() => setShowError(false), 3000);
+    errorTimeoutRef.current = window.setTimeout(() => {
+      setShowError(false);
+      errorTimeoutRef.current = null;
+    }, 3000);
   };
 
   // GoogleフォームのID

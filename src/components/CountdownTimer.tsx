@@ -10,9 +10,9 @@ const CountdownTimer: React.FC = () => {
     };
 
     const calculateTimeLeft = (): Partial<TimeLeft> => {
-        // 目標日を設定（一旦、今年の12月31日に設定）
+        // 目標日を設定（10月31日に設定）
         const year = new Date().getFullYear();
-        const difference = +new Date(`${year}-12-31T23:59:59`) - +new Date();
+        const difference = +new Date(`${year}-10-31T23:59:59`) - +new Date();
         let timeLeft: Partial<TimeLeft> = {};
 
         if (difference > 0) {
@@ -88,9 +88,9 @@ const CountdownTimer: React.FC = () => {
                     transition={{ duration: 0.5, type: 'spring' }}
                     className="fixed bottom-4 left-4 z-50 bg-neutral-900/80 backdrop-blur-md text-white p-2 rounded-lg shadow-2xl border border-white/10 flex items-center gap-x-3 md:block md:p-4 md:w-auto hover:bg-neutral-700/80 transition-colors"
                 >
-                    <h4 className="hidden md:block text-xs font-bold tracking-wider md:text-center md:mb-3">クラウドファンディング終了まで</h4>
+                    <h4 className="hidden md:block text-xs font-bold tracking-wider md:text-center md:mb-3">実話募集の締め切りまで</h4>
                     <div className="flex flex-col gap-y-0.5 md:flex-row md:justify-center">
-                        {timerComponents.length ? timerComponents : <span>プロジェクト終了</span>}
+                        {timerComponents.length ? timerComponents : <span>実話募集を締め切りました</span>}
                     </div>
                 </motion.button>
             )}

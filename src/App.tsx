@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Title from './components/Title';
 import Introduction from './components/Introduction';
@@ -12,6 +13,9 @@ import Contact from './components/Contact';
 import SponsorSection from './components/Sponsor';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import MyPage from './pages/MyPage';
+import SponsorMyPage from './pages/SponsorMyPage';
+import IndividualMyPage from './pages/IndividualMyPage';
 import Seo from './components/Seo';
 import CountdownTimer from './components/CountdownTimer';
 import { seoKeywords } from './constants';
@@ -25,7 +29,8 @@ function App() {
   const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
-  return (
+  // メインページコンポーネント
+  const MainPage = () => (
     <div className="bg-black">
       <Seo
         title="True Story【実話の物語】| これは、あなたの物語かもしれない。"
@@ -53,8 +58,19 @@ function App() {
 
       <CountdownTimer />
       {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
-      <Analytics />
     </div>
+  );
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/mypage/individual" element={<IndividualMyPage />} />
+        <Route path="/mypage/sponsor" element={<SponsorMyPage />} />
+      </Routes>
+      <Analytics />
+    </Router>
   );
 }
 

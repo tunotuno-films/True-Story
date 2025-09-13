@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { Menu, X } from 'lucide-react';
 
@@ -8,6 +9,7 @@ interface Vote {
 }
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
   const [latestVotes, setLatestVotes] = useState<Vote[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const animationRef = useRef<HTMLDivElement>(null);
@@ -40,9 +42,14 @@ const Header: React.FC = () => {
   };
 
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    // マイページ関連のページにいる場合は、メインページに戻ってからスクロール
+    if (window.location.pathname.startsWith('/mypage')) {
+      navigate(`/#${sectionId}`);
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
@@ -52,7 +59,11 @@ const Header: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.location.pathname.startsWith('/mypage')) {
+      navigate('/');
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const navItems = [
@@ -64,6 +75,10 @@ const Header: React.FC = () => {
     { id: 'crowdfunding', label: 'PROJECT' },
     { id: 'contact', label: 'CONTACT' },
   ];
+
+  const handleMyPageClick = () => {
+    navigate('/mypage');
+  };
 
   // reduce設定を監視
   useEffect(() => {
@@ -115,6 +130,12 @@ const Header: React.FC = () => {
                   {item.label}
                 </button>
               ))}
+              <button
+                onClick={handleMyPageClick}
+                className="text-neutral-300 hover:text-white transition duration-300 font-noto border border-neutral-500 hover:border-white px-3 py-1 rounded-md"
+              >
+                マイページ
+              </button>
             </div>
 
             {/* モバイル用ハンバーガーボタン (md未満で表示) */}
@@ -158,6 +179,28 @@ const Header: React.FC = () => {
                 )}
               </div>
             ))}
+            {/* モバイル用マイページボタン */}
+            <div 
+              className={`transition-all duration-300 ease-in-out ${
+                isMenuOpen 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-2'
+              }`}
+              style={{ 
+                transitionDelay: isMenuOpen ? `${navItems.length * 50}ms` : '0ms' 
+              }}
+            >
+              <div className="border-b border-gray-700/50 mx-2"></div>
+              <button
+                onClick={() => {
+                  handleMyPageClick();
+                  setIsMenuOpen(false);
+                }}
+                className="block w-full text-left py-4 px-2 text-neutral-300 hover:text-white hover:bg-gray-800/50 transition-all duration-300 font-noto rounded-md border border-neutral-500 hover:border-white mt-2"
+              >
+                マイページ
+              </button>
+            </div>
           </div>
         </div>
       </nav>

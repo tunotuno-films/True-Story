@@ -2,10 +2,54 @@ import React from 'react';
 import clsx from 'clsx';
 
 const steps = [
-	{ label: '企画開始', description: '2025年8月', unlocked: false, details: ['コンセプト決定', 'チーム編成', '法務・権利確認'] },
-	{ label: 'クラウドファンディング', description: '2025年10月', unlocked: false, details: ['リワード設計', '告知準備', 'ランディングページ制作'] },
-	{ label: '制作開始', description: '2025年12月', unlocked: false, details: ['脚本・絵コンテ', 'キャスティング', 'ロケハン・撮影準備'] },
-	{ label: '完成・公開', description: '2026年2月', unlocked: false, details: ['仕上げ（編集/MA/色）', '配信・公開準備', '各種リリース'] },
+	{
+		label: '第1フェーズ',
+		description: '2025年9月〜',
+		unlocked: false,
+		details: ['実話募集', 'アーティスト募集', 'スポンサーシップ募集（1次）'],
+	},
+	{
+		label: '第2フェーズ',
+		description: '2025年11月〜',
+		unlocked: false,
+		details: ['実話審査と決定', 'アーティスト募集書類審査', 'スポンサーシップ決定（1次）'],
+	},
+	{
+		label: '第3フェーズ',
+		description: '2025年12月〜',
+		unlocked: false,
+		details: ['アーティストSNS一般投票', 'スポンサーシップ募集（2次）'],
+	},
+	{
+		label: '第4フェーズ',
+		description: '2026年1月〜',
+		unlocked: false,
+		details: ['アーティスト最終審査', '出演者募集', 'スポンサーシップ決定（2次）'],
+	},
+	{
+		label: '第5フェーズ',
+		description: '2026年2月〜',
+		unlocked: false,
+		details: ['楽曲制作期間', '出演者選考期間'],
+	},
+	{
+		label: '第6フェーズ',
+		description: '2026年3月〜',
+		unlocked: false,
+		details: ['楽曲完成', 'クラウドファンディング開始', 'スポンサーシップ募集、決定（3次）'],
+	},
+	{
+		label: '第7フェーズ',
+		description: '2026年5月〜',
+		unlocked: false,
+		details: ['ミュージックビデオ撮影、編集'],
+	},
+	{
+		label: '第8フェーズ',
+		description: '2026年7月〜',
+		unlocked: false,
+		details: ['クラウドファンディングリターン発送', '本編公開', 'メイキング等コンテンツ公開'],
+	},
 ];
 
 const Schedule: React.FC = () => {
@@ -18,7 +62,9 @@ const Schedule: React.FC = () => {
 	return (
 		<section className="py-20 md:py-32 bg-neutral-900">
 			<div className="container mx-auto px-6 md:px-12">
-				<h2 className="section-title text-3xl md:text-5xl text-center mb-6 gradient-text">SCHEDULE</h2>
+				<h2 className="section-title text-3xl md:text-5xl text-center mb-6 gradient-text">
+					SCHEDULE
+				</h2>
 
 				{/* 全体進捗バッジ */}
 				<div className="mb-10 flex items-center justify-center gap-3">
@@ -60,7 +106,13 @@ const Schedule: React.FC = () => {
 								{/* 角にデコ（図形のニュアンス） */}
 								<div
 									className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rotate-45 opacity-10"
-									style={{ background: isDone ? '#10B981' : isCurrent ? '#F59E0B' : '#525252' }}
+									style={{
+										background: isDone
+											? '#10B981'
+											: isCurrent
+											? '#F59E0B'
+											: '#525252',
+									}}
 								/>
 
 								{/* ヘッダー（番号/チェック＋ラベル） */}
@@ -69,23 +121,39 @@ const Schedule: React.FC = () => {
 										className={clsx(
 											'flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold',
 											{
-												'bg-gradient-to-r from-emerald-500 to-teal-500 text-white': isDone,
-												'bg-neutral-900 text-amber-300 border-2 border-amber-300': isCurrent,
+												'bg-gradient-to-r from-emerald-500 to-teal-500 text-white':
+													isDone,
+												'bg-neutral-900 text-amber-300 border-2 border-amber-300':
+													isCurrent,
 												'bg-neutral-700 text-neutral-400': isFuture,
 											}
 										)}
 									>
 										{isDone ? (
-											<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-												<path d="M20 6L9 17l-5-5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+											<svg
+												className="h-6 w-6"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+											>
+												<path
+													d="M20 6L9 17l-5-5"
+													strokeWidth="2.5"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												/>
 											</svg>
 										) : (
 											idx + 1
 										)}
 									</div>
 									<div className="flex-1">
-										<div className="font-noto text-white font-bold">{step.label}</div>
-										<div className="text-neutral-400 text-sm">{step.description}</div>
+										<div className="font-noto text-white font-bold">
+											{step.label}
+										</div>
+										<div className="text-neutral-400 text-sm">
+											{step.description}
+										</div>
 									</div>
 								</div>
 
@@ -95,9 +163,12 @@ const Schedule: React.FC = () => {
 										className={clsx(
 											'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold',
 											{
-												'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/20': isDone,
-												'bg-amber-500/15 text-amber-300 ring-1 ring-amber-400/20': isCurrent,
-												'bg-neutral-700/50 text-neutral-400 ring-1 ring-white/10': isFuture,
+												'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/20':
+													isDone,
+												'bg-amber-500/15 text-amber-300 ring-1 ring-amber-400/20':
+													isCurrent,
+												'bg-neutral-700/50 text-neutral-400 ring-1 ring-white/10':
+													isFuture,
 											}
 										)}
 									>
@@ -108,14 +179,17 @@ const Schedule: React.FC = () => {
 								{/* 詳細（常時表示） */}
 								<div className="mt-4">
 									<div className="mt-3 rounded-lg border border-white/10 bg-neutral-900/40 p-3">
-										{Array.isArray(step.details) && step.details.length > 0 ? (
+										{Array.isArray(step.details) &&
+										step.details.length > 0 ? (
 											<ul className="list-disc list-inside space-y-1 text-sm text-neutral-300">
 												{step.details.map((d: string) => (
 													<li key={d}>{d}</li>
 												))}
 											</ul>
 										) : (
-											<p className="text-sm text-neutral-400">詳細は未設定です。</p>
+											<p className="text-sm text-neutral-400">
+												詳細は未設定です。
+											</p>
 										)}
 									</div>
 								</div>
