@@ -42,8 +42,8 @@ const Header: React.FC = () => {
   };
 
   const scrollToSection = (sectionId: string) => {
-    // マイページ関連のページにいる場合は、メインページに戻ってからスクロール
-    if (window.location.pathname.startsWith('/mypage')) {
+    // ユーザー関連ページにいる場合はメインページに戻ってからスクロール
+    if (window.location.pathname.startsWith('/users')) {
       navigate(`/#${sectionId}`);
     } else {
       const element = document.getElementById(sectionId);
@@ -59,7 +59,7 @@ const Header: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    if (window.location.pathname.startsWith('/mypage')) {
+    if (window.location.pathname.startsWith('/users')) {
       navigate('/');
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -67,17 +67,14 @@ const Header: React.FC = () => {
   };
 
   const navItems = [
-    { id: 'introduction', label: 'INTRODUCTION' },
-    { id: 'message', label: 'MESSAGE' },
     { id: 'truestory', label: 'TRUE STORY' },
     { id: 'artist', label: 'ARTIST' },
-    { id: 'news', label: 'NEWS' },
-    { id: 'crowdfunding', label: 'PROJECT' },
+    { id: 'crowdfunding', label: 'CROWDFUNDING' },
     { id: 'contact', label: 'CONTACT' },
   ];
 
   const handleMyPageClick = () => {
-    navigate('/mypage');
+    navigate('/users');
   };
 
   // reduce設定を監視
@@ -134,7 +131,7 @@ const Header: React.FC = () => {
                 onClick={handleMyPageClick}
                 className="text-neutral-300 hover:text-white transition duration-300 font-noto border border-neutral-500 hover:border-white px-3 py-1 rounded-md"
               >
-                マイページ
+                メンバーシップ
               </button>
             </div>
 
@@ -198,7 +195,7 @@ const Header: React.FC = () => {
                 }}
                 className="block w-full text-left py-4 px-2 text-neutral-300 hover:text-white hover:bg-gray-800/50 transition-all duration-300 font-noto rounded-md border border-neutral-500 hover:border-white mt-2"
               >
-                マイページ
+                メンバーシップ
               </button>
             </div>
           </div>

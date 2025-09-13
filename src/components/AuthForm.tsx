@@ -182,7 +182,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
 
   const handleAdditionalInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
       if (googleUser) {
         // member_idを直接生成（タイムスタンプ + ランダム値）
@@ -254,12 +253,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
           console.error('User metadata update error:', updateError);
         }
 
+        // 個人_members挿入成功後のリダイレクト
         const userName = authFormData.nickname || `${authFormData.lastName} ${authFormData.firstName}`;
         setShowAdditionalInfoForm(false);
         setGoogleUser(null);
         
         console.log('AuthForm - Additional info submitted, calling onAuthSuccess with member data');
         onAuthSuccess(googleUser.email, userName);
+        // handleAuthSuccess 側で /users/member へリダイレクトされます
       }
     } catch (error) {
       console.error('Additional info submission error:', error);
@@ -443,8 +444,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
   if (mode === 'usertype') {
     return (
       <div className="max-w-md mx-auto p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center text-white">ユーザータイプを選択</h2>
-        
+        {/* <h2 className="text-2xl font-bold mb-6 text-center text-white">タイプを選択</h2> */}
         <div className="space-y-4 mb-6">
           <button
             onClick={() => {
@@ -455,8 +455,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
             <div className="flex items-center gap-3">
               <Users className="w-6 h-6 text-green-500" />
               <div>
-                <h3 className="font-bold text-white">一般ユーザー</h3>
-                <p className="text-sm text-neutral-400">個人での登録</p>
+                <h3 className="font-bold text-white">メンバーシップ</h3>
+                <p className="text-sm text-neutral-400">個人ユーザーの方はこちら</p>
               </div>
             </div>
           </button>
@@ -470,8 +470,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
             <div className="flex items-center gap-3">
               <Building className="w-6 h-6 text-blue-500" />
               <div>
-                <h3 className="font-bold text-white">スポンサー企業</h3>
-                <p className="text-sm text-neutral-400">企業・団体での登録</p>
+                <h3 className="font-bold text-white">スポンサーシップ</h3>
+                <p className="text-sm text-neutral-400">企業・団体の方はこちら</p>
               </div>
             </div>
           </button>
@@ -490,7 +490,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
           ← ユーザータイプ選択に戻る
         </button>
         
-        <h2 className="text-2xl font-bold mb-6 text-center text-white">一般ユーザー登録</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">メンバーシップ</h2>
 
         <div className="mb-6">
           <button
@@ -504,7 +504,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
-            <span className="text-base">Googleで登録</span>
+            <span className="text-base">Googleでログイン</span>
           </button>
           
           <div className="relative my-6">
@@ -532,7 +532,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
           ← ユーザータイプ選択に戻る
         </button>
         
-        <h2 className="text-2xl font-bold mb-6 text-center text-white">スポンサー企業登録</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">スポンサーシップ</h2>
         <SponsorAuthForm onAuthSuccess={onAuthSuccess} />
       </div>
     );
@@ -555,7 +555,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode = 'signi
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-          <span className="text-base">Googleでログイン</span>
+          <span className="text-base">Googleで登録</span>
         </button>
         
         <div className="relative my-6">

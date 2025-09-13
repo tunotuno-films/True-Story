@@ -84,7 +84,7 @@ const IndividualMyPage: React.FC = () => {
         loadingTimeout = setTimeout(() => {
           if (!hasCompletedCheck) {
             console.log('Loading timeout - redirecting to main mypage');
-            navigate('/mypage');
+            navigate('/users');
             hasCompletedCheck = true;
           }
         }, 3000);
@@ -115,12 +115,12 @@ const IndividualMyPage: React.FC = () => {
           } else {
             // 個人会員でない場合は通常のマイページにリダイレクト
             console.log('Not an individual member, redirecting to main mypage');
-            navigate('/mypage');
+            navigate('/users');
             return;
           }
         } else {
           // 未ログインの場合は通常のマイページにリダイレクト
-          navigate('/mypage');
+          navigate('/users');
           return;
         }
         
@@ -134,7 +134,7 @@ const IndividualMyPage: React.FC = () => {
         hasCompletedCheck = true;
         clearTimeout(loadingTimeout);
         clearTimeout(minimalLoaderTimeout);
-        navigate('/mypage');
+        navigate('/users');
       }
     };
 
@@ -149,7 +149,7 @@ const IndividualMyPage: React.FC = () => {
             isSigningOut.current = false;
             return;
           }
-          navigate('/mypage');
+          navigate('/users');
         }
       }
     );
@@ -219,7 +219,7 @@ const IndividualMyPage: React.FC = () => {
 
             <div className="max-w-md mx-auto">
               <div className="bg-neutral-800 rounded-lg p-6 mb-6">
-                <h3 className="text-xl font-bold mb-4 text-green-400">一般ユーザー情報</h3>
+                <h3 className="text-xl font-bold mb-4 text-green-400">メンバーシップ情報</h3>
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm text-neutral-400">お名前</p>

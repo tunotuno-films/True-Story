@@ -58,7 +58,7 @@ const MyPage: React.FC = () => {
 
           if (individualMember) {
             // 個人ユーザーは専用ページにリダイレクト
-            window.location.href = '/mypage/individual';
+            window.location.href = '/users/member';
             return;
           } else {
             const { data: sponsorMember } = await supabase
@@ -69,7 +69,7 @@ const MyPage: React.FC = () => {
 
             if (sponsorMember) {
               // スポンサーは専用ページにリダイレクト
-              window.location.href = '/mypage/sponsor';
+              window.location.href = '/users/sponsor';
               return;
             }
           }
@@ -111,7 +111,7 @@ const MyPage: React.FC = () => {
 
           if (individualMember) {
             console.log('MyPage - Individual member found, redirecting');
-            window.location.href = '/mypage/individual';
+            window.location.href = '/users/member';
             return;
           } else {
             const { data: sponsorMember } = await supabase
@@ -122,7 +122,7 @@ const MyPage: React.FC = () => {
 
             if (sponsorMember) {
               console.log('MyPage - Sponsor member found, redirecting');
-              window.location.href = '/mypage/sponsor';
+              window.location.href = '/users/sponsor';
               return;
             } else {
               console.log('MyPage - No member found, will show AuthForm');
@@ -166,7 +166,7 @@ const MyPage: React.FC = () => {
 
           if (individualMember) {
             // 個人ユーザーの場合は専用ページにリダイレクト
-            window.location.href = '/mypage/individual';
+            window.location.href = '/users/member';
             return;
           } else {
             const { data: sponsorMember } = await supabase
@@ -177,7 +177,7 @@ const MyPage: React.FC = () => {
 
             if (sponsorMember) {
               // スポンサーの場合は専用ページにリダイレクト
-              window.location.href = '/mypage/sponsor';
+              window.location.href = '/users/sponsor';
               return;
             }
           }

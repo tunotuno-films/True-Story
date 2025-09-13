@@ -114,7 +114,7 @@ export const getRedirectURL = () => {
 
 export const handleGoogleAuth = async () => {
   const base = getRedirectURL();
-  const redirectTo = `${base.replace(/\/$/, '')}/mypage`; // 認証後は /mypage に戻す
+  const redirectTo = `${base.replace(/\/$/, '')}/users`; // 認証後は /users に戻す
 
   // デバッグログを強化：Supabase に渡す redirectTo を明示表示します
   console.info('[authUtils] Google auth redirectTo ->', redirectTo);
