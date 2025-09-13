@@ -144,21 +144,58 @@ export const robustSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.warn('Supabase signOut returned error:', error);
+      // ここではエラーをそのまま続行してフォールバック処理へ進める
     }
   } catch (err) {
     console.warn('Supabase signOut threw error:', err);
+    // 続行してフォールバック処理へ
   } finally {
     // localStorage はブラウザ環境でのみ利用可能なため、存在チェックを行う
     if (typeof window !== 'undefined' && window.localStorage) {
       try {
         Object.keys(window.localStorage).forEach((k) => {
-          if (k.toLowerCase().includes('supabase')) {
-            window.localStorage.removeItem(k);
+          const key = String(k);
+          const lower = key.toLowerCase();
+          // supabase-js v2 uses keys like "sb-<project_ref>-auth-token"
+          // older versions used "supabase." prefix. Remove either.
+          if (lower.startsWith('sb-') || lower.startsWith('supabase.')) {
+            window.localStorage.removeItem(key);
           }
         });
       } catch (e) {
         console.warn('Failed to clear supabase localStorage items.', e);
       }
     }
+
+    // フォールバック:
+    // サーバ側に残る httpOnly クッキーを確実に破棄するため、
+    // Supabase の /auth/v1/logout にリダイレクトする（redirect_to に戻り先を指定）
+    // 環境変数または import.meta.env から supabase URL を取得する
+    try {
+      let supabaseUrl = '';
+      if (typeof process !== 'undefined' && process?.env?.REACT_APP_SUPABASE_URL) {
+        supabaseUrl = String(process.env.REACT_APP_SUPABASE_URL);
+      } else if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
+        const metaEnv = (import.meta as any).env;
+        supabaseUrl = metaEnv.VITE_SUPABASE_URL || metaEnv.REACT_APP_SUPABASE_URL || metaEnv.SUPABASE_URL || '';
+      } else if ((supabase as any)?.url) {
+        // 予備: supabase クライアントに URL が格納されていれば使用
+        supabaseUrl = (supabase as any).url || '';
+      }
+
+      supabaseUrl = supabaseUrl.replace(/\/$/, '');
+
+      if (supabaseUrl && typeof window !== 'undefined') {
+        const redirectTo = window.location.origin || `${window.location.protocol}//${window.location.host}`;
+        const logoutUrl = `${supabaseUrl}/auth/v1/logout?redirect_to=${encodeURIComponent(redirectTo)}`;
+        console.info('[authUtils] redirecting to Supabase logout endpoint:', logoutUrl);
+        // 強制的にブラウザを遷移させ、サーバ側クッキーを破棄してから戻す
+        window.location.href = logoutUrl;
+        return; // リダイレクトするのでここで終了
+      }
+    } catch (e) {
+      console.warn('Failed to perform supabase logout redirect fallback:', e);
+    }
+    // フォールバックが行えない場合は何もしない（呼び出し側でナビゲート処理を行う）
   }
 };
