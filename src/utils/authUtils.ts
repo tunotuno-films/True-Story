@@ -148,14 +148,17 @@ export const robustSignOut = async () => {
   } catch (err) {
     console.warn('Supabase signOut threw error:', err);
   } finally {
-    try {
-      Object.keys(localStorage).forEach((k) => {
-        if (k.toLowerCase().includes('supabase')) {
-          localStorage.removeItem(k);
-        }
-      });
-    } catch (e) {
-      console.warn('Failed to clear supabase localStorage items.', e);
+    // localStorage はブラウザ環境でのみ利用可能なため、存在チェックを行う
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        Object.keys(window.localStorage).forEach((k) => {
+          if (k.toLowerCase().includes('supabase')) {
+            window.localStorage.removeItem(k);
+          }
+        });
+      } catch (e) {
+        console.warn('Failed to clear supabase localStorage items.', e);
+      }
     }
   }
 };

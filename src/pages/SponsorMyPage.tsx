@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { robustSignOut } from '../utils/authUtils';
@@ -19,6 +19,7 @@ const SponsorMyPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showMinimalLoader, setShowMinimalLoader] = useState(false);
   const navigate = useNavigate();
+  const isSigningOut = useRef(false);
 
   useEffect(() => {
     let loadingTimeout: NodeJS.Timeout;
@@ -93,6 +94,11 @@ const SponsorMyPage: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event) => {
         if (event === 'SIGNED_OUT') {
+          // 自分でサインアウト処理中の場合はリスナー側のナビゲーションを無視
+          if (isSigningOut.current) {
+            isSigningOut.current = false;
+            return;
+          }
           navigate('/mypage');
         }
       }
@@ -114,8 +120,11 @@ const SponsorMyPage: React.FC = () => {
   // クライアント側のセッション情報（localStorage）をクリアするようにしています。
   // 将来別の箇所でサインアウト処理を追加する場合は `robustSignOut` を再利用してください。
   const handleSignOut = async () => {
+    // 手動サインアウト中であることを示すフラグを立てる（リスナーと競合しないようにする）
+    isSigningOut.current = true;
     await robustSignOut();
-    window.location.href = '/';
+    // SPA ナビゲーションでスムーズにトップへ戻す
+    navigate('/');
   };
 
   if (isLoading && !showMinimalLoader) {
