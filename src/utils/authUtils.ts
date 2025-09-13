@@ -81,23 +81,30 @@ export const checkMemberExists = async (userId: string) => {
   }
 };
 
+export const getRedirectURL = () => {
+  // 環境変数が設定されている場合はそれを使用
+  if (process.env.REACT_APP_SITE_URL) {
+    return process.env.REACT_APP_SITE_URL;
+  }
+  
+  // フォールバック: ホスト名で判定
+  const isProduction = window.location.hostname === 'www.truestory.jp';
+  return isProduction ? 'https://www.truestory.jp' : 'http://localhost:3000';
+};
+
 export const handleGoogleAuth = async () => {
-  console.log('Starting Google authentication');
-  try {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + window.location.pathname,
-        queryParams: {
-          prompt: 'select_account'
-        }
-      }
-    });
-    
-    if (error) throw error;
-    console.log('Google auth initiated');
-  } catch (error) {
-    console.error('Google authentication error:', error);
-    alert('Google認証エラーが発生しました');
+  const redirectTo = getRedirectURL();
+  
+  console.log('Google auth redirect URL:', redirectTo);
+  
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: redirectTo
+    }
+  });
+  
+  if (error) {
+    console.error('Google auth error:', error);
   }
 };
