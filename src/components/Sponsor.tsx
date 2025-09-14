@@ -140,7 +140,7 @@ const Sponsor: React.FC = () => {
   }, []);
 
   return (
-    <section id="sponsors" className="py-20 md:py-32 bg-black text-white">
+    <section id="sponsors" className="py-20 md:py-32 bg-neutral-900 text-white">
       <div className="container mx-auto px-6 md:px-12">
         <h2 className="section-title text-4xl md:text-5xl text-center mb-4 gradient-text">
           SPONSOR
@@ -165,27 +165,36 @@ const Sponsor: React.FC = () => {
                   </h3>
                   <div className="max-w-4xl mx-auto">
                     {group.type === 'main' ? (
-                      <div>
+                      <div className="space-y-6">
                         {groupSponsors.map((sponsor) => (
-                          <MainSponsorCard key={sponsor.id} sponsor={sponsor} />
+                          // 枠を無くし、背景をセクションと同色に合わせる
+                          <div key={sponsor.id} className="bg-neutral-900 p-6 rounded-lg">
+                            <MainSponsorCard sponsor={sponsor} />
+                          </div>
                         ))}
                       </div>
                     ) : group.type === 'supporter' ? (
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-3 text-center max-w-64 mx-auto md:max-w-4xl md:mx-auto">
                         {groupSponsors.map((sponsor) => (
-                          <SupporterSponsorCard key={sponsor.id} sponsor={sponsor} />
+                          <div key={sponsor.id} className="bg-neutral-900 p-3 rounded-md">
+                            <SupporterSponsorCard sponsor={sponsor} />
+                          </div>
                         ))}
                       </div>
                     ) : group.type === 'gold' ? (
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 max-w-64 mx-auto md:max-w-4xl md:mx-auto">
                         {groupSponsors.map((sponsor) => (
-                          <GoldSponsorCard key={sponsor.id} sponsor={sponsor} styles={styles} />
+                          <div key={sponsor.id} className="bg-neutral-900 p-4 rounded-lg">
+                            <GoldSponsorCard sponsor={sponsor} styles={styles} />
+                          </div>
                         ))}
                       </div>
                     ) : (
                       <div className={`grid ${styles.grid} gap-4 max-w-64 mx-auto md:max-w-4xl md:mx-auto`}>
                         {groupSponsors.map((sponsor) => (
-                          <SilverSponsorCard key={sponsor.id} sponsor={sponsor} styles={styles} />
+                          <div key={sponsor.id} className="bg-neutral-900 p-3 rounded-md flex items-center justify-center">
+                            <SilverSponsorCard sponsor={sponsor} styles={styles} />
+                          </div>
                         ))}
                       </div>
                     )}
