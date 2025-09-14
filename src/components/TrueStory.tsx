@@ -23,6 +23,29 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
 
   const localStorageKey = 'trueStoryDraft';
 
+  // 書き方の例（ユーザー提供の文章）
+  const exampleStory = `私は高知県の女子大に通う大学1年生です。
+私には大学の友達には誰にも言えない秘密があります。
+高校3年の時に体験したちょっと変わった恋愛体験です。
+私には当時気になっていた同級生がいました。
+でも、怖くて誰にも言えませんでした。
+恋愛対象が女性だったからです。
+友達は、サッカー部の○○君かっこいいとか、野球部の○○君かっこいいという話で盛り上がっていましたが、私は全くそんな感情がなく
+ずっと目で追いかけていたのはクラスの女の子でした。
+その子は3年の4月に、東京から引っ越してきた転校生でした。
+「なんか、気になる。」
+本当にこれだけでした。
+元々、高校1年の時は他のクラスの同級生の男子とお付き合いしていたり、普通に青春を過ごしていました。
+高校2年の時には、バスケ部の男子からの猛アタックもあったり...。
+バスケ部の彼は学年でも優しくて評判の男子でした。
+でも高校3年の4月を境に急に自分の恋愛観が変わりました。
+正直あの時に体験は書ききれないし、うまく伝えきれません。
+でも、ビビッときました。
+そのまま特に何も変わらない日々が続き、
+バスケ部の彼から屋上で告白されました。
+すごく嬉しかったのですが、どうしても4月に感じたあの感覚が忘れられずに、気持ちには応えられないと断って、
+転校生の子のところへ向かいました・・・`;
+
   // エラー表示タイマー管理
   const errorTimeoutRef = useRef<number | null>(null);
 
@@ -73,6 +96,25 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
 
   // スクロールイベントのdebounce用
   const scrollDebounceRef = useRef<number | null>(null);
+
+  // main の textarea 参照（例文を挿入時にフォーカスするため）
+  const storyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // 例文をメイン入力欄に挿入する（PDF確認後のみ有効）
+  const insertExampleToForm = () => {
+    if (!hasViewedGuidelines) return;
+    setStory(exampleStory);
+    localStorage.setItem(localStorageKey, exampleStory);
+    setIsSubmitted(false);
+    // state 反映後にフォーカス・カーソル移動
+    setTimeout(() => {
+      const el = storyTextareaRef.current;
+      if (el) {
+        el.focus();
+        el.selectionStart = el.selectionEnd = el.value.length;
+      }
+    }, 0);
+  };
 
   useEffect(() => {
     return () => {
@@ -192,6 +234,36 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
           {/* 確認状況表示はフォーム中央へ移動のため削除 */}
         </div>
 
+        {/* 書き方の例（同じデザインの読み取り専用フォーム） */}
+        <div className="mb-8 max-w-3xl mx-auto">
+          <h4 className="text-left text-sm text-neutral-300 mb-2 font-semibold">書き方の例</h4>
+          <div className="relative">
+            <textarea
+              value={exampleStory}
+              readOnly
+              rows={22}
+              className={`w-full p-4 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder:text-gray-500 text-sm min-h-[420px] ${
+                showError ? 'border-red-500 focus:ring-2 focus:ring-red-500' : ''
+              }`}
+            />
+          </div>
+          <div className="text-right text-neutral-400 text-sm mt-2 pr-1">
+            {exampleStory.length}文字
+          </div>
+          <div className="text-center mt-4">
+            <button
+              type="button"
+              onClick={insertExampleToForm}
+              disabled={!hasViewedGuidelines}
+              className={`bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg ${
+                !hasViewedGuidelines ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              この例文を元に書く
+            </button>
+          </div>
+        </div>
+
         {/* カスタムエラーメッセージ */}
         {showError && (
           <div className="mb-6 p-4 bg-red-900/50 border-l-4 border-red-500 text-red-200 rounded-md">
@@ -218,17 +290,13 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
         ) : (
           <form onSubmit={handleMainSubmit}>
             {/* スクロール未確認時の注意喚起 */}
-            {!hasViewedGuidelines && (
-              <div className="mb-3 text-center text-sm text-neutral-400">
-                募集要項を最後まで確認すると入力できます。
-              </div>
-            )}
             <div className="relative">
               <textarea
+                ref={storyTextareaRef}
                 value={story}
                 onChange={handleStoryChange}
                 placeholder="ここにあなたの物語を記入してください..."
-                rows={10}
+                rows={20}
                 disabled={!hasViewedGuidelines}
                 className={`w-full p-4 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder:text-gray-500 text-lg disabled:opacity-50 disabled:cursor-not-allowed ${
                   showError ? 'border-red-500 focus:ring-2 focus:ring-red-500' : ''
@@ -402,32 +470,35 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
                 </button>
               </div>
               <div
-                className="h-full overflow-y-auto bg-neutral-800/30"
+                className="h-full overflow-auto bg-neutral-800/30"
                 onScroll={handleGuidelinesScroll}
               >
-                <object
-                  data="/pdf/20250824_TrueStory_ApplicationGuidelines.pdf#view=FitH"
-                  type="application/pdf"
-                  className="w-full min-h-[1400px]"
-                >
-                  <iframe
-                    src="/pdf/20250824_TrueStory_ApplicationGuidelines.pdf#view=FitH"
-                    className="w-full min-h-[1400px]"
-                    title="募集要項PDF"
-                  />
-                  <p className="p-4 text-neutral-300 text-sm">
-                    PDFを表示できない場合は{" "}
-                    <a
-                      href="/pdf/20250824_TrueStory_ApplicationGuidelines.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-cyan-400 hover:underline"
-                    >
-                      こちら
-                    </a>
-                    を開いてください。
-                  </p>
-                </object>
+                <div className="w-full flex justify-center">
+                  {/* min-w を指定して縮小を防ぎ、必要なら横スクロールで閲覧可能にする */}
+                  <object
+                    data="/pdf/20250824_TrueStory_ApplicationGuidelines.pdf#view=FitH"
+                    type="application/pdf"
+                    className="min-w-[760px] w-full max-w-none min-h-[1400px]"
+                  >
+                    <iframe
+                      src="/pdf/20250824_TrueStory_ApplicationGuidelines.pdf#view=FitH"
+                      className="min-w-[760px] w-full max-w-none min-h-[1400px]"
+                      title="募集要項PDF"
+                    />
+                    <p className="p-4 text-neutral-300 text-sm">
+                      PDFを表示できない場合は{" "}
+                      <a
+                        href="/pdf/20250824_TrueStory_ApplicationGuidelines.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-cyan-400 hover:underline"
+                      >
+                        こちら
+                      </a>
+                      を開いてください。
+                    </p>
+                  </object>
+                </div>
               </div>
               <div className="px-4 py-2 border-t border-neutral-700 text-xs text-neutral-400">
                 最後までスクロールすると確認済みになります。

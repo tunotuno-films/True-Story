@@ -8,7 +8,7 @@ import TrueStory from './components/TrueStory';
 import Artist from './components/Artist';
 import News from './components/News';
 import MainAd from './components/MainAd';
-import Crowdfunding from './components/Project';
+import Crowdfunding from './components/Crowdfunding';
 import Contact from './components/Contact';
 import SponsorSection from './components/Sponsor';
 import Footer from './components/Footer';
