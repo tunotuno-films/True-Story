@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, X } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import type { AuthFormData, AuthFormProps } from '../types/auth';
-import { 
-  generateYears, 
-  generateMonths, 
-  generateDays, 
+import {
+  generateYears,
+  generateMonths,
+  generateDays,
   formatBirthDate,
-  calculatePasswordStrength
+  calculatePasswordStrength,
+  handleGoogleAuth, // 追加
+  checkMemberExists, // 追加
+  robustSignOut // 追加
 } from '../utils/authUtils';
+import { useNavigate } from 'react-router-dom'; // 追加
 
 const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -27,8 +31,11 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
     phoneNumber: '',
     nickname: '',
   });
+  const [googleUser, setGoogleUser] = useState<any>(null); // 追加
+  const [isCheckingMember, setIsCheckingMember] = useState(false); // 追加
+  const navigate = useNavigate(); // 追加
 
-  const passwordStrength = calculatePasswordStrength(formData.password);
+  const passwordStrength = calculatePasswordStrength(formData.password || '');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -37,17 +44,161 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       const filteredValue = value.replace(/[^\w@.-]/g, '');
       setFormData(prev => ({ ...prev, [name]: filteredValue }));
     } else if (name === 'password') {
-      // 英数字のみ許可
       const filteredValue = value.replace(/[^a-zA-Z0-9]/g, '');
       setFormData(prev => ({ ...prev, [name]: filteredValue }));
     } else if (name === 'phoneNumber') {
-      // 数字のみ許可
       const filteredValue = value.replace(/[^0-9]/g, '');
       setFormData(prev => ({ ...prev, [name]: filteredValue }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
+
+  // Google認証処理 (AuthFormから移植)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('IndividualAuthForm - Auth state change:', event, session?.user?.id);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          const user = session.user;
+          const isGoogleAuth = user.app_metadata?.provider === 'google';
+          
+          if (isGoogleAuth) {
+            console.log('IndividualAuthForm - Google auth detected for user:', user.id);
+            setIsCheckingMember(true);
+            
+            const timeout = setTimeout(async () => {
+              console.log('Member check timeout - logging out user');
+              try {
+                await supabase.auth.signOut();
+                setIsCheckingMember(false);
+                setShowAdditionalInfo(false);
+                setGoogleUser(null);
+                navigate('/users'); // タイムアウト時はユーザータイプ選択に戻る
+              } catch (error) {
+                console.error('Timeout logout error:', error);
+              }
+            }, 5000);
+
+            try {
+              const existingMember = await checkMemberExists(user.id);
+              clearTimeout(timeout);
+              
+              console.log('IndividualAuthForm - Member check result:', existingMember);
+              
+              if (!existingMember) {
+                console.log('IndividualAuthForm - No existing member found, showing additional info form');
+                setGoogleUser(user);
+                setFormData(prev => ({
+                  ...prev,
+                  email: user.email || '',
+                  nickname: ''
+                }));
+                setShowAdditionalInfo(true);
+                setIsCheckingMember(false);
+              } else if (existingMember.userType === 'individual') {
+                console.log('IndividualAuthForm - Existing individual member found, proceeding with login');
+                const userName = existingMember.nickname || `${existingMember.last_name} ${existingMember.first_name}`;
+                setIsCheckingMember(false);
+                onAuthSuccess(user.email || '', userName, user.id);
+              } else {
+                // Google認証でログインしたが、個人会員ではない場合
+                console.log('IndividualAuthForm - Google auth user is not an individual member, redirecting to /users');
+                await robustSignOut(); // ログアウトしてユーザータイプ選択に戻す
+                navigate('/users');
+              }
+            } catch (error) {
+              clearTimeout(timeout);
+              console.error('Member check error:', error);
+              setGoogleUser(user);
+              setFormData(prev => ({
+                ...prev,
+                email: user.email || '',
+                nickname: ''
+              }));
+              setShowAdditionalInfo(true);
+              setIsCheckingMember(false);
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setShowAdditionalInfo(false);
+          setGoogleUser(null);
+          setIsCheckingMember(false);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [onAuthSuccess, navigate]);
+
+  // 初回ロード時の現在セッションチェックも追加 (AuthFormから移植)
+  useEffect(() => {
+    const checkCurrentSession = async () => {
+      try {
+        if (
+          typeof window !== 'undefined' &&
+          window.location.hash &&
+          (window.location.hash.includes('access_token') ||
+            window.location.hash.includes('error') ||
+            window.location.hash.includes('provider_token'))
+        ) {
+          console.log('IndividualAuthForm - processing auth callback from URL hash');
+          try {
+            const { error } = await supabase.auth.getSession();
+            if (error) {
+              console.warn('getSession error:', error);
+            }
+          } catch (e) {
+            console.error('Error calling getSession:', e);
+          }
+          try {
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+          } catch (e) {
+            console.warn('Failed to replace history state', e);
+          }
+        }
+      } catch (e) {
+        console.error('Error handling auth callback hash:', e);
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const user = session.user;
+        const isGoogleAuth = user.app_metadata?.provider === 'google';
+        
+        if (isGoogleAuth) {
+          console.log('IndividualAuthForm - Existing Google session found:', user.id);
+          setIsCheckingMember(true);
+          
+          const existingMember = await checkMemberExists(user.id);
+          
+          if (!existingMember) {
+            console.log('IndividualAuthForm - No member record for existing Google session');
+            setGoogleUser(user);
+            setFormData(prev => ({
+              ...prev,
+              email: user.email || '',
+              nickname: ''
+            }));
+            setShowAdditionalInfo(true);
+          } else if (existingMember.userType === 'individual') {
+            console.log('IndividualAuthForm - Existing individual member for current session');
+            const userName = existingMember.nickname || `${existingMember.last_name} ${existingMember.first_name}`;
+            onAuthSuccess(user.email || '', userName, user.id);
+          } else {
+            console.log('IndividualAuthForm - Existing Google auth user is not an individual member, redirecting to /users');
+            await robustSignOut();
+            navigate('/users');
+          }
+          
+          setIsCheckingMember(false);
+        }
+      }
+    };
+
+    checkCurrentSession();
+  }, [onAuthSuccess, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +207,7 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       if (authMode === 'signin') {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: formData.email,
-          password: formData.password,
+          password: formData.password || '',
         });
 
         if (error) throw error;
@@ -66,7 +217,6 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           return;
         }
 
-        // individual_membersテーブルから情報を取得
         const { data: existingMember, error: memberError } = await supabase
           .from('individual_members')
           .select('*')
@@ -74,7 +224,6 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           .single();
 
         if (memberError && memberError.code === 'PGRST116') {
-          // 会員情報が存在しない場合、追加情報入力フォームを表示
           setAuthenticatedUser(user);
           setFormData(prev => ({
             ...prev,
@@ -94,16 +243,13 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           user.user_metadata?.full_name ||
           user.email || '';
 
-        onAuthSuccess(user.email || '', userName);
+        onAuthSuccess(user.email || '', userName, user.id);
 
-        // 個人ユーザーログイン成功時は専用ページにリダイレクト
-        window.location.href = '/mypage/individual';
         return;
-      } else {
-        // signup
+      } else { // signup
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
-          password: formData.password,
+          password: formData.password || '',
           options: {
             data: {
               last_name: formData.lastName,
@@ -123,13 +269,11 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           return;
         }
         
-        // 確認メール送信の成功を示すモーダルを表示
         if (!user.email_confirmed_at) {
           setShowEmailConfirmModal(true);
           return;
         }
 
-        // メール認証が完了している場合のみデータベースに挿入
         const timestamp = Date.now();
         const random = Math.floor(Math.random() * 1000);
         const memberId = `IND${timestamp}${random}`;
@@ -152,10 +296,8 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
         }
 
         const userName = formData.nickname || `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
-        onAuthSuccess(formData.email, userName);
+        onAuthSuccess(formData.email, userName, user.id);
 
-        // 個人ユーザー登録成功時は専用ページにリダイレクト
-        window.location.href = '/mypage/individual';
         return;
       }
     } catch (err) {
@@ -168,9 +310,11 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
     e.preventDefault();
     
     try {
-      if (!authenticatedUser) {
+      if (!googleUser && !authenticatedUser) {
         throw new Error('認証されたユーザー情報が見つかりません。');
       }
+
+      const targetUser = googleUser || authenticatedUser;
 
       const birthDate = formatBirthDate(formData.birthYear, formData.birthMonth, formData.birthDay);
       const timestamp = Date.now();
@@ -179,12 +323,12 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
 
       const { error: insertError } = await supabase.from('individual_members').insert({
         member_id: memberId,
-        auth_user_id: authenticatedUser.id,
+        auth_user_id: targetUser.id,
         last_name: formData.lastName,
         first_name: formData.firstName,
         birth_date: birthDate,
         gender: formData.gender,
-        email: formData.email,
+        email: targetUser.email,
         phone_number: formData.phoneNumber,
         nickname: formData.nickname,
       });
@@ -195,19 +339,25 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       }
 
       const userName = formData.nickname || `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
-      onAuthSuccess(formData.email, userName);
-
-      // 個人ユーザー登録成功時は専用ページにリダイレクト
-      window.location.href = '/mypage/individual';
+      setShowAdditionalInfo(false);
+      setGoogleUser(null);
+      setAuthenticatedUser(null);
+      onAuthSuccess(targetUser.email, userName, targetUser.id);
     } catch (err) {
       console.error('Additional info submission error:', err);
       alert('追加情報の保存でエラーが発生しました: ' + ((err as Error).message || String(err)));
     }
   };
 
+  const handleCancelGoogleAuth = async () => {
+    await robustSignOut();
+    setShowAdditionalInfo(false);
+    setGoogleUser(null);
+    navigate('/users');
+  };
+
   const closeEmailConfirmModal = () => {
     setShowEmailConfirmModal(false);
-    // フォームをリセット
     setFormData({
       email: '',
       password: '',
@@ -223,7 +373,19 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
     setAuthMode('signin');
   };
 
-  // メール確認モーダル
+  if (isCheckingMember) {
+    return (
+      <div className="max-w-md mx-auto p-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">認証確認中...</h2>
+          <p className="text-neutral-300 mb-6">しばらくお待ちください</p>
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-xs text-neutral-400 mt-4">5秒以上かかる場合は自動的にリセットされます</p>
+        </div>
+      </div>
+    );
+  }
+
   if (showEmailConfirmModal) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -404,12 +566,21 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-5 py-3 rounded-md text-base transition duration-200"
-          >
-            登録を完了する
-          </button>
+          <div className="flex gap-4 pt-2">
+            <button
+              type="button"
+              onClick={handleCancelGoogleAuth}
+              className="flex-1 bg-neutral-700 hover:bg-neutral-600 text-white px-5 py-3 rounded-md text-base transition duration-200"
+            >
+              キャンセル
+            </button>
+            <button
+              type="submit"
+              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-5 py-3 rounded-md text-base transition duration-200"
+            >
+              登録を完了する
+            </button>
+          </div>
         </form>
       </div>
     );
@@ -417,6 +588,30 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Googleログインボタンをメールフォームの上に移動 */}
+      <button
+        type="button"
+        onClick={handleGoogleAuth}
+        className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 flex items-center justify-center gap-3 px-5 py-3 rounded-md transition duration-200"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+        </svg>
+        <span className="text-base">Googleでログイン</span>
+      </button>
+
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-neutral-600"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-4 bg-neutral-900 text-neutral-400">または</span>
+        </div>
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-neutral-300 mb-2">
           メールアドレス <span className="text-red-500">*</span>
@@ -507,11 +702,11 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
               type="text"
               name="nickname"
               value={formData.nickname}
-                onChange={handleInputChange}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-md p-3 text-white placeholder-neutral-400 focus:border-green-500 focus:outline-none"
-                required
-                placeholder="たろう"
-              />
+              onChange={handleInputChange}
+              className="w-full bg-neutral-700 border border-neutral-600 rounded-md p-3 text-white placeholder-neutral-400 focus:border-green-500 focus:outline-none"
+              required
+              placeholder="たろう"
+            />
             <p className="text-xs text-neutral-400 mt-2">サイト上で表示される名前です</p>
           </div>
 

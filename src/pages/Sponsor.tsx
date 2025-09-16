@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { robustSignOut } from '../utils/authUtils';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PrivacyPolicy from '../components/PrivacyPolicy';
+import SponsorAuthForm from '../components/SponsorAuthForm';
 
 interface User {
   email: string;
@@ -13,20 +14,19 @@ interface User {
   memberData?: any;
 }
 
-const SponsorMyPage: React.FC = () => {
+const SponsorPage: React.FC = () => {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showMinimalLoader, setShowMinimalLoader] = useState(false);
   const navigate = useNavigate();
   const isSigningOut = useRef(false);
+  const { id: urlId } = useParams<{ id: string }>();
 
   useEffect(() => {
-    let loadingTimeout: NodeJS.Timeout;
     let minimalLoaderTimeout: NodeJS.Timeout;
     let hasCompletedCheck = false;
 
-    // 500ms後に最小限のローダーを表示
     minimalLoaderTimeout = setTimeout(() => {
       if (!hasCompletedCheck) {
         setShowMinimalLoader(true);
@@ -35,56 +35,52 @@ const SponsorMyPage: React.FC = () => {
 
     const checkSession = async () => {
       try {
-        loadingTimeout = setTimeout(() => {
-          if (!hasCompletedCheck) {
-            console.log('Loading timeout - redirecting to main mypage');
-            navigate('/users');
-            hasCompletedCheck = true;
-          }
-        }, 3000);
-
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
-          const user = session.user;
+          const currentUser = session.user;
+
+          // URLにIDがあり、セッションユーザーのIDと一致しない場合はリダイレクト
+          if (urlId && currentUser.id !== urlId) {
+            console.log('URL ID does not match session user ID. Redirecting.');
+            navigate('/users');
+            return;
+          }
           
-          // スポンサー会員情報をチェック
           const { data: sponsorMember } = await supabase
             .from('sponsor_members')
             .select('*')
-            .eq('auth_user_id', user.id)
+            .eq('auth_user_id', currentUser.id)
             .single();
 
           if (sponsorMember) {
             const userName = `${sponsorMember.last_name} ${sponsorMember.first_name}`;
             setUser({
-              email: user.email || '',
+              email: currentUser.email || '',
               name: userName,
               userType: 'sponsor',
               memberData: sponsorMember
             });
           } else {
             // スポンサー会員でない場合は通常のマイページにリダイレクト
-            console.log('Not a sponsor member, redirecting to main mypage');
             navigate('/users');
             return;
           }
         } else {
-          // 未ログインの場合は通常のマイページにリダイレクト
-          navigate('/users');
-          return;
+          // 未ログインの場合
+          setUser(null);
         }
         
         hasCompletedCheck = true;
-        clearTimeout(loadingTimeout);
         clearTimeout(minimalLoaderTimeout);
         setIsLoading(false);
         setShowMinimalLoader(false);
       } catch (error) {
         console.error('Session check error:', error);
         hasCompletedCheck = true;
-        clearTimeout(loadingTimeout);
         clearTimeout(minimalLoaderTimeout);
+        setUser(null);
+        setIsLoading(false);
         navigate('/users');
       }
     };
@@ -92,39 +88,52 @@ const SponsorMyPage: React.FC = () => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event) => {
+      async (event, session) => {
+        if (event === 'SIGNED_IN') {
+          if (session?.user) {
+            navigate(`/users/sponsor/${session.user.id}`);
+          } else {
+            checkSession();
+          }
+        }
         if (event === 'SIGNED_OUT') {
-          // 自分でサインアウト処理中の場合はリスナー側のナビゲーションを無視
           if (isSigningOut.current) {
             isSigningOut.current = false;
             return;
           }
-          navigate('/users');
+          setUser(null);
+          navigate('/users/sponsor');
         }
       }
     );
 
     return () => {
-      clearTimeout(loadingTimeout);
       clearTimeout(minimalLoaderTimeout);
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, urlId]);
 
   const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
-  // 注意:
-  // サインアウト処理は IndividualMyPage や AuthForm などと重複しやすいため、
-  // 共通ユーティリティ `robustSignOut` を使ってサーバ側の signOut が失敗した場合でも
-  // クライアント側のセッション情報（localStorage）をクリアするようにしています。
-  // 将来別の箇所でサインアウト処理を追加する場合は `robustSignOut` を再利用してください。
   const handleSignOut = async () => {
-    // 手動サインアウト中であることを示すフラグを立てる（リスナーと競合しないようにする）
     isSigningOut.current = true;
     await robustSignOut();
-    // SPA ナビゲーションでスムーズにトップへ戻す
+    setUser(null);
     navigate('/');
+  };
+
+  const handleAuthSuccess = (email: string, name?: string, userId?: string) => {
+    // use email and name in a no-op to avoid "declared but its value is never read" error
+    void email;
+    void name;
+
+    if (userId) {
+      navigate(`/users/sponsor/${userId}`);
+    } else {
+      // 認証後にIDが取得できない場合はページをリロードして再チェック
+      window.location.reload();
+    }
   };
 
   if (isLoading && !showMinimalLoader) {
@@ -133,7 +142,7 @@ const SponsorMyPage: React.FC = () => {
         <Header />
         <main className="container mx-auto px-4 py-16">
           <div className="text-center">
-            <h1 className="text-4xl font-bold font-noto mb-8">スポンサーマイページ</h1>
+            <h1 className="text-4xl font-bold font-noto mb-8">スポンサーページ</h1>
           </div>
         </main>
         <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
@@ -147,11 +156,35 @@ const SponsorMyPage: React.FC = () => {
         <Header />
         <main className="container mx-auto px-4 py-16">
           <div className="text-center">
-            <h1 className="text-4xl font-bold font-noto mb-8">スポンサーマイページ</h1>
+            <h1 className="text-4xl font-bold font-noto mb-8">スポンサーページ</h1>
             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           </div>
         </main>
         <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-neutral-900 text-white">
+        <Header />
+        <main className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold font-noto mb-6">スポンサーシップ</h1>
+              <p className="text-neutral-300">スポンサーとしてログインまたは新規登録</p>
+              <div className="mt-4">
+                <Link to="/users" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                  アカウントの種類選択に戻る
+                </Link>
+              </div>
+            </div>
+            <SponsorAuthForm onAuthSuccess={handleAuthSuccess} />
+          </div>
+        </main>
+        <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
+        {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
       </div>
     );
   }
@@ -241,4 +274,4 @@ const SponsorMyPage: React.FC = () => {
   );
 };
 
-export default SponsorMyPage;
+export default SponsorPage;

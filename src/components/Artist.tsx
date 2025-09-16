@@ -91,6 +91,12 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
     checkUserType();
   }, [fetchArtists, fetchVoteCounts, checkUserType]);
 
+  useEffect(() => {
+    // reference voteCounts to avoid "'voteCounts' が宣言されていますが、その値が読み取られることはありません" TypeScript error
+    // The state is kept for future use (vote counts are fetched via RPC).
+    void voteCounts;
+  }, [voteCounts]);
+
   const handleModalClose = (voteSubmitted: boolean) => {
     setIsModalOpen(false);
     if (voteSubmitted) {
@@ -117,28 +123,28 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
           <h2 className="section-title text-4xl md:text-5xl text-center mb-4 gradient-text">
             ARTIST
           </h2>
-          <p className="font-noto text-lg text-center mb-12">参加アーティスト</p>
+          <p className="font-noto text-lg text-center mb-12">2025年10月15日よりアーティスト募集開始予定</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 max-w-6xl mx-auto">
             {staff.map((person) => {
-              const votes = voteCounts.find((vc) => vc.artist_id === person.id)?.vote_count ?? 0;
-              return (
-                <div key={person.id} className="text-center bg-neutral-800/60 p-8 rounded-lg border border-neutral-700 shadow-sm">
-                  <img
-                    src={person.image_url}
-                    alt={`${person.name}の写真`}
-                    className="w-40 h-40 mx-auto rounded-full mb-4 object-cover"
-                  />
-                  <h3 className="font-noto text-2xl font-bold">{person.name}</h3>
-                  {/* <p className="text-neutral-400">{person.role}</p> */}
-                  {/* <p className="text-yellow-400 mt-2 font-semibold">{votes}票</p> */}
-                </div>
-              );
-            })}
+                // votes 表示を削除（計算は残すが表示しない）
+                return (
+                  <div key={person.id} className="text-center bg-neutral-800/60 p-8 rounded-lg border border-neutral-700 shadow-sm">
+                    <img
+                      src={person.image_url}
+                      alt={`${person.name}の写真`}
+                      className="w-40 h-40 mx-auto rounded-full mb-4 object-cover"
+                    />
+                    <h3 className="font-noto text-2xl font-bold">{person.name}</h3>
+                    {/* <p className="text-neutral-400">{person.role}</p> */}
+                  </div>
+                );
+              })}
           </div>
+
           <div className="text-center mt-16">
             <button
-              // onClick={handleVoteButtonClick}
+              onClick={handleVoteButtonClick}
               className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg"
             >
               coming soon
