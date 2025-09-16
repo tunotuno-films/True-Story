@@ -20,7 +20,6 @@ const Header: React.FC = () => {
   const animationRef = useRef<HTMLDivElement>(null);
   const [applyWillChange, setApplyWillChange] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const fetchLatestVotes = useCallback(async () => {
     const { data, error } = await supabase
@@ -78,33 +77,20 @@ const Header: React.FC = () => {
     navigate('/users');
   };
 
+  // ログイン中はマイページへ遷移、未ログイン時はメンバーシップへ
   const handleAuthButtonClick = () => {
     if (isLoggedIn) {
-      setIsConfirmOpen(true);
+      const userId = (session as any)?.user?.id;
+      if (userId) {
+        navigate(`/users/member/${userId}`);
+        return;
+      }
+      // fallback: メンバーシップ画面へ（session が取れない場合）
+      handleMyPageClick();
     } else {
       handleMyPageClick();
     }
   };
-
-  const performSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {
-      console.error('Sign out error:', e);
-    } finally {
-      setIsConfirmOpen(false);
-      navigate('/');
-    }
-  };
-
-  useEffect(() => {
-    if (!isConfirmOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsConfirmOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isConfirmOpen]);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -157,7 +143,7 @@ const Header: React.FC = () => {
                   className="text-white transition duration-300 font-noto px-2 py-1 border border-transparent hover:opacity-90"
                 >
                   <span className="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-2 px-4 rounded">
-                   {isLoggedIn ? 'ログアウト' : 'メンバーシップ'}
+                   {isLoggedIn ? 'マイページ' : 'メンバーシップ'}
                   </span>
                 </button>
               </div>
@@ -220,61 +206,13 @@ const Header: React.FC = () => {
                   className="block w-full text-left py-4 px-4 transition-all duration-300 font-noto mt-2"
                 >
                   <span className="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-2 px-4 rounded">
-                    {isLoggedIn ? 'ログアウト' : 'メンバーシップ'}
+                    {isLoggedIn ? 'マイページ' : 'メンバーシップ'}
                   </span>
                 </button>
               </div>
             </div>
           </div>
         </nav>
-
-        {isConfirmOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            aria-modal="true"
-            role="dialog"
-            aria-labelledby="logout-modal-title"
-          >
-            <div
-              className="absolute inset-0 bg-black/60"
-              onClick={() => setIsConfirmOpen(false)}
-              aria-hidden="true"
-            />
-            <div className="relative bg-neutral-800 w-[90%] max-w-md rounded-lg shadow-lg p-8 mx-4 text-white">
-              <button
-                onClick={() => setIsConfirmOpen(false)}
-                className="absolute top-3 right-3 text-neutral-400 hover:text-white text-2xl leading-none"
-                aria-label="閉じる"
-              >
-                ×
-              </button>
-
-              <div className="text-center">
-                <h2 id="logout-modal-title" className="text-2xl font-bold mb-3">
-                  ログアウトしますか？
-                </h2>
-                <p className="text-sm text-neutral-300 mb-6 md:whitespace-nowrap">
-                  メンバーシップにアクセスする場合は再度ログインが必要です。
-                </p>
-
-                <div className="flex justify-center gap-3">
-                  <button
-                    onClick={() => setIsConfirmOpen(false)}
-                    className="px-6 py-2 rounded-md bg-neutral-700 hover:bg-neutral-600 text-white transition"
-                  >
-                    キャンセル
-                  </button>
-                  <button
-                    onClick={performSignOut}
-                    className="px-6 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition"
-                  >
-                    ログアウト
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="relative z-10 py-2 overflow-hidden isolate">
           <div

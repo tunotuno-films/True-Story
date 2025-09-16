@@ -4,8 +4,7 @@ import Header from './components/Header';
 import Title from './components/Title';
 import Introduction from './components/Introduction';
 import Message from './components/Message';
-import TrueStorySupa from './components/TrueStory_supa';
-const TrueStorySupaAny: any = TrueStorySupa;
+import TrueStory from './components/TrueStory';
 import Artist from './components/Artist';
 import News from './components/News';
 import MainAd from './components/MainAd';
@@ -94,7 +93,7 @@ const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: 
         <GoldAd />
         {/* ここをアンカーターゲットにする */}
         <section id="truestory">
-          <TrueStorySupaAny onShowPrivacyPolicy={openPrivacyPolicy} />
+          <TrueStory />
         </section>
         <Artist onShowPrivacyPolicy={openPrivacyPolicy} />
         <Crowdfunding />
