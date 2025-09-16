@@ -1,6 +1,8 @@
+import { User } from '@supabase/supabase-js';
+
 export interface AuthFormData {
   email: string;
-  password: string;
+  password?: string;
   lastName?: string;
   firstName?: string;
   birthYear?: string;
@@ -13,12 +15,17 @@ export interface AuthFormData {
   companyAddress?: string;
   department?: string;
   position?: string;
-  contactPhone?: string; // 担当者電話用の新しいフィールド
+  contactPhone?: string;
 }
 
 export interface AuthFormProps {
-  onAuthSuccess: (email: string, name?: string) => void;
+  onAuthSuccess: (email: string, name?: string, authUserId?: string) => void;
   initialMode?: 'signin' | 'signup';
 }
 
-export type UserType = 'individual' | 'sponsor';
+export interface AuthContextType {
+  session: any;
+  user: User | null;
+  loading: boolean;
+  signOut: () => Promise<void>;
+}

@@ -68,10 +68,7 @@ const MainAd: React.FC = () => {
             >
               <div className="w-full">
                 <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
-                  <a
-                    href={ad.link || ad.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <div
                     style={{
                       display: 'block',
                       position: 'absolute',
@@ -100,7 +97,7 @@ const MainAd: React.FC = () => {
                         style={{ pointerEvents: 'none', border: 0 }}
                       />
                     )}
-                  </a>
+                  </div>
                 </div>
               </div>
             </div>

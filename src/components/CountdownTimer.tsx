@@ -81,7 +81,7 @@ const CountdownTimer: React.FC = () => {
         <AnimatePresence>
             {isVisible && (
                 <motion.button
-                    onClick={() => scrollToSection('crowdfunding')}
+                    onClick={() => scrollToSection('truestory')}
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -50 }}

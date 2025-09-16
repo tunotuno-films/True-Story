@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { robustSignOut } from '../utils/authUtils';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PrivacyPolicy from '../components/PrivacyPolicy';
+import IndividualAuthForm from '../components/IndividualAuthForm';
+import { useAuth } from '../contexts/AuthContext';
 
 interface User {
   email: string;
@@ -21,7 +23,9 @@ const IndividualMyPage: React.FC = () => {
   const [voteHistory, setVoteHistory] = useState<any[]>([]);
   const [isLoadingVotes, setIsLoadingVotes] = useState(false);
   const navigate = useNavigate();
+  const { userId } = useParams<{ userId: string }>();
   const isSigningOut = useRef(false);
+  const { session, loading: authLoading } = useAuth();
 
   // 投票履歴を取得する関数
   const fetchVoteHistory = async (authUserId: string) => {
@@ -69,6 +73,13 @@ const IndividualMyPage: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('Member.tsx useEffect triggered. authLoading:', authLoading, 'session:', session, 'userId from params:', userId);
+
+    if (authLoading) {
+      console.log('AuthContext is still loading. Returning.');
+      return; // AuthContextの初期ロード中は待機
+    }
+
     let loadingTimeout: NodeJS.Timeout;
     let minimalLoaderTimeout: NodeJS.Timeout;
     let hasCompletedCheck = false;
@@ -79,49 +90,57 @@ const IndividualMyPage: React.FC = () => {
       }
     }, 500);
 
-    const checkSession = async () => {
+    const checkUserStatus = async () => {
+      console.log('checkUserStatus started. Current session:', session, 'userId:', userId);
       try {
         loadingTimeout = setTimeout(() => {
           if (!hasCompletedCheck) {
-            console.log('Loading timeout - redirecting to main mypage');
-            navigate('/users');
-            hasCompletedCheck = true;
+            console.log('Loading timeout - forcing login form or redirect.');
+            setIsLoading(false);
+            setShowMinimalLoader(false);
+            setUser(null); // Ensure login form is shown if timeout occurs and not logged in
           }
-        }, 3000);
+        }, 3000); // 3秒でタイムアウト
 
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          const user = session.user;
+        if (!session?.user) {
+          console.log('checkUserStatus: No session user found. Showing login form.');
+          setUser(null); // ユーザー情報をクリア
+          setIsLoading(false);
+          setShowMinimalLoader(false);
+        } else {
+          const currentUser = session.user;
+          console.log('checkUserStatus: Session user found.', currentUser.id);
+
+          // URLの userId が存在しない、または現在のユーザーIDと一致しない場合
+          if (!userId || userId !== currentUser.id) {
+            console.log('checkUserStatus: URL userId missing or mismatch. Redirecting to own page.', { currentUserId: currentUser.id, urlUserId: userId });
+            navigate(`/users/member/${currentUser.id}`);
+            return; // リダイレクト後にこのuseEffectの実行を停止
+          }
           
+          console.log('checkUserStatus: URL userId matches session user. Fetching individual member data.');
           // 個人会員情報をチェック
           const { data: individualMember } = await supabase
             .from('individual_members')
             .select('*')
-            .eq('auth_user_id', user.id)
+            .eq('auth_user_id', currentUser.id)
             .single();
 
           if (individualMember) {
+            console.log('checkUserStatus: Individual member data found.', individualMember);
             const userName = individualMember.nickname || `${individualMember.last_name} ${individualMember.first_name}`;
             setUser({
-              email: user.email || '',
+              email: currentUser.email || '',
               name: userName,
               userType: 'individual',
               memberData: individualMember
             });
-            
-            // 投票履歴を取得
-            await fetchVoteHistory(user.id);
+            await fetchVoteHistory(currentUser.id);
           } else {
-            // 個人会員でない場合は通常のマイページにリダイレクト
-            console.log('Not an individual member, redirecting to main mypage');
+            console.log('checkUserStatus: Authenticated but not an individual member. Redirecting to user type selection.');
             navigate('/users');
-            return;
+            return; // リダイレクト後にこのuseEffectの実行を停止
           }
-        } else {
-          // 未ログインの場合は通常のマイページにリダイレクト
-          navigate('/users');
-          return;
         }
         
         hasCompletedCheck = true;
@@ -130,26 +149,35 @@ const IndividualMyPage: React.FC = () => {
         setIsLoading(false);
         setShowMinimalLoader(false);
       } catch (error) {
-        console.error('Session check error:', error);
+        console.error('checkUserStatus: Session check error:', error);
         hasCompletedCheck = true;
         clearTimeout(loadingTimeout);
         clearTimeout(minimalLoaderTimeout);
-        navigate('/users');
+        setIsLoading(false);
+        setShowMinimalLoader(false);
+        setUser(null); // エラー時もログインフォームを表示
       }
     };
 
-    checkSession();
+    checkUserStatus();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event) => {
-        // ローカルで signOut を開始した場合はこのリスナー側のナビゲーションを無視する
+      async (event, currentSession) => {
+        console.log('IndividualMyPage - Auth state change listener:', event, 'currentSession:', currentSession);
         if (event === 'SIGNED_OUT') {
+          console.log('Auth state change: SIGNED_OUT.');
           if (isSigningOut.current) {
-            // フラグをリセットして早期終了（handleSignOut 側で navigate('/') を実行済み）
             isSigningOut.current = false;
             return;
           }
-          navigate('/users');
+          setUser(null);
+          setIsLoading(false);
+          setShowMinimalLoader(false);
+        } else if (event === 'SIGNED_IN' && currentSession?.user) {
+          console.log('Auth state change: SIGNED_IN.', currentSession.user.id);
+          // ログインイベント発生時、自分のページにリダイレクト
+          // このリダイレクトにより、新しいURLでコンポーネントが再マウントされ、useEffectが再実行される
+          navigate(`/users/member/${currentSession.user.id}`);
         }
       }
     );
@@ -159,26 +187,50 @@ const IndividualMyPage: React.FC = () => {
       clearTimeout(minimalLoaderTimeout);
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, session, authLoading, userId]);
 
   const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
   const handleSignOut = async () => {
-    // 自前のサインアウトフロー中であることを示すフラグ
+    console.log('handleSignOut called.');
     isSigningOut.current = true;
     await robustSignOut();
-    // SPA のナビゲーションを使用（ページ全体のリロードを避ける）
-    navigate('/');
+    navigate('/'); // サインアウト後はトップページへ
   };
 
-  if (isLoading && !showMinimalLoader) {
+  const handleAuthSuccess = async (authUserId?: string) => {
+    console.log('IndividualMyPage - handleAuthSuccess called. authUserId:', authUserId);
+    if (authUserId) {
+      console.log('handleAuthSuccess: Navigating to user ID page.', authUserId);
+      navigate(`/users/member/${authUserId}`);
+    } else {
+      console.log('handleAuthSuccess: authUserId is missing. Re-checking session.');
+      const { data: { session: newSession } } = await supabase.auth.getSession();
+      if (newSession?.user) {
+        console.log('handleAuthSuccess: New session found. Navigating to user ID page.', newSession.user.id);
+        navigate(`/users/member/${newSession.user.id}`);
+      } else {
+        console.log('handleAuthSuccess: No session found after auth success. Showing login form.');
+        setUser(null);
+        setIsLoading(false);
+        setShowMinimalLoader(false);
+      }
+    }
+  };
+
+  // ローディング状態の表示
+  if (isLoading || authLoading) {
+    console.log('Rendering: Loading state.', { isLoading, authLoading });
     return (
       <div className="min-h-screen bg-neutral-900 text-white">
         <Header />
         <main className="container mx-auto px-4 py-16">
           <div className="text-center">
             <h1 className="text-4xl font-bold font-noto mb-8">マイページ</h1>
+            {showMinimalLoader && (
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            )}
           </div>
         </main>
         <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
@@ -186,7 +238,35 @@ const IndividualMyPage: React.FC = () => {
     );
   }
 
-  if (isLoading && showMinimalLoader) {
+  // 未ログインの場合、ログインフォームを表示
+  if (!session?.user) {
+    console.log('Rendering: Not logged in. Showing login form.');
+    return (
+      <div className="min-h-screen bg-neutral-900 text-white">
+        <Header />
+        <main className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold font-noto mb-6">メンバーシップ</h1>
+              <p className="text-neutral-300">メンバーとしてログインまたは新規登録</p>
+              <div className="mt-4">
+                <Link to="/users" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                  アカウントの種類選択に戻る
+                </Link>
+              </div>
+            </div>
+            <IndividualAuthForm onAuthSuccess={handleAuthSuccess} />
+          </div>
+        </main>
+        <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
+        {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
+      </div>
+    );
+  }
+
+  // ログイン済みだがユーザー情報がまだロードされていない場合（リダイレクト後など）
+  if (session?.user && !user) {
+    console.log('Rendering: Logged in but user data not loaded yet.');
     return (
       <div className="min-h-screen bg-neutral-900 text-white">
         <Header />
@@ -194,6 +274,7 @@ const IndividualMyPage: React.FC = () => {
           <div className="text-center">
             <h1 className="text-4xl font-bold font-noto mb-8">マイページ</h1>
             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-neutral-300 mt-4">ユーザー情報を読み込み中...</p>
           </div>
         </main>
         <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
@@ -201,6 +282,8 @@ const IndividualMyPage: React.FC = () => {
     );
   }
 
+  // ログイン済みでユーザー情報がロードされている場合、マイページコンテンツを表示
+  console.log('Rendering: User data loaded. Showing member content.', user);
   return (
     <div className="min-h-screen bg-neutral-900 text-white">
       <Header />
@@ -313,4 +396,4 @@ const IndividualMyPage: React.FC = () => {
   );
 };
 
-export default IndividualMyPage;
+export { IndividualMyPage };

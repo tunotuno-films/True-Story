@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const Project: React.FC = () => {
+const Crowdfunding: React.FC = () => {
 
   return (
     <section id="crowdfunding" className="py-20 md:py-32 bg-neutral-900">
@@ -9,21 +10,21 @@ const Project: React.FC = () => {
         <p className="font-noto text-lg mb-12">クラウドファンディング期間：2026年3月1日〜2026年4月14日（予定）</p>
         <div className="max-w-4xl mx-auto text-left bg-neutral-800/60 p-8 md:p-12 rounded-lg border border-neutral-700 shadow-sm">
           <p className="font-noto text-base leading-relaxed text-neutral-300 mb-8">
-            リターン内容や実際の開始時期などは、当サイトやメールマガジンにてお知らせいたします。
+            リターン内容や実際の開始時期などは、当サイトにてお知らせいたします。
           </p>
           <p className="font-noto text-base leading-relaxed text-neutral-300 mb-8">
             以下から、メンバーシップへの登録（無料）をお願いいたします。
           </p>
         </div>
-        <a
-          href="#link-to-crowdfunding-site"
+        <Link
+          to="/users"
           className="btn-cta inline-block mt-12 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold font-noto py-4 px-12 rounded-full text-lg shadow-lg"
         >
-          coming soon
-        </a>
+          メンバーシップへの登録（無料）
+        </Link>
       </div>
     </section>
   );
 };
 
-export default Project;
+export default Crowdfunding;

@@ -24,7 +24,7 @@ const Title: React.FC = () => {
       {/* モバイルで少し上に移動: -translate-y-6 (mobile)、md以上で元位置に戻す */}
       <div className="relative z-10 p-6 md:p-12 w-full transform -translate-y-12 md:translate-y-0">
         <h2 className="font-noto text-lg md:text-3xl font-bold text-shadow mb-2 md:mb-4">
-          これは、あなたの物語かもしれない。
+          あなたの物語が、未来をつくる。
         </h2>
         <h1 className="font-noto text-4xl md:text-8xl font-black text-shadow tracking-wider">
           True Story
@@ -35,7 +35,7 @@ const Title: React.FC = () => {
         
         <div className="mt-4 md:mt-8">
           <div className="text-xs md:text-sm text-shadow font-bold">
-            運営：True Story【実話の物語】製作委員会
+            運営：True Story【実話の物語】制作委員会
           </div>
         </div>
 
@@ -43,7 +43,7 @@ const Title: React.FC = () => {
           onClick={() => scrollToSection('truestory')}
           className="btn-cta inline-block mt-6 md:mt-12 mb-8 md:mb-0 bg-white text-black font-bold font-noto py-3 md:py-4 px-8 md:px-12 rounded-full text-base md:text-lg shadow-lg"
         >
-          実話募集中！
+          あなたの実話を募集中
         </button>
         <p className="font-noto mt-2 md:mt-4 text-xs md:text-sm">募集期間: 2025.09.15 - 2025.10.31</p>
       </div>

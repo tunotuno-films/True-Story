@@ -15,10 +15,10 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
     companyAddress: '',
     department: '',
     position: '',
-    contactPhone: '', // 担当者電話用の新しいフィールド
+    contactPhone: '',
   });
 
-  const passwordStrength = calculatePasswordStrength(formData.password);
+  const passwordStrength = calculatePasswordStrength(formData.password || '');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -27,11 +27,9 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       const filteredValue = value.replace(/[^\w@.-]/g, '');
       setFormData(prev => ({ ...prev, [name]: filteredValue }));
     } else if (name === 'password') {
-      // 英数字のみ許可
       const filteredValue = value.replace(/[^a-zA-Z0-9]/g, '');
       setFormData(prev => ({ ...prev, [name]: filteredValue }));
     } else if (name === 'contactPhone') {
-      // 数字のみ許可
       const filteredValue = value.replace(/[^0-9]/g, '');
       setFormData(prev => ({ ...prev, [name]: filteredValue }));
     } else {
@@ -46,7 +44,7 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       if (authMode === 'signin') {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: formData.email,
-          password: formData.password,
+          password: formData.password ?? '',
         });
 
         if (error) throw error;
@@ -56,7 +54,6 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           return;
         }
 
-        // sponsor_membersテーブルから情報を取得
         const { data: existingMember } = await supabase
           .from('sponsor_members')
           .select('*')
@@ -67,16 +64,13 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           user.user_metadata?.full_name ||
           user.email || '';
 
-        onAuthSuccess(user.email || '', userName);
+        onAuthSuccess(user.email || '', userName, user.id);
 
-        // スポンサーログイン成功時は専用ページにリダイレクト
-        window.location.href = '/mypage/sponsor';
         return;
-      } else {
-        // signup
+      } else { // signup
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
-          password: formData.password,
+          password: formData.password ?? '',
           options: {
             data: {
               last_name: formData.lastName,
@@ -94,7 +88,6 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           return;
         }
 
-        // 認証状態の変更を待つ
         let insertAttempts = 0;
         const maxAttempts = 5;
 
@@ -102,7 +95,6 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           try {
             insertAttempts++;
             
-            // Generate member_id and insert into sponsor_members table
             const timestamp = Date.now();
             const random = Math.floor(Math.random() * 1000);
             const memberId = `SPO${timestamp}${random}`;
@@ -125,7 +117,6 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
 
             if (insertError) {
               if (insertError.code === '42501' && insertAttempts < maxAttempts) {
-                // RLSエラーの場合、1秒待ってリトライ
                 console.log(`Insert attempt ${insertAttempts} failed, retrying...`);
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 return attemptInsert();
@@ -137,10 +128,9 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             console.log('Successfully inserted sponsor member:', insertData);
 
             const userName = `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
-            onAuthSuccess(formData.email, userName);
+            onAuthSuccess(formData.email, userName, user.id);
 
-            // スポンサー登録成功時は専用ページにリダイレクト
-            window.location.href = '/mypage/sponsor';
+            return;
           } catch (error) {
             if (insertAttempts >= maxAttempts) {
               throw new Error(`登録に失敗しました。${maxAttempts}回試行しましたが、セッションの確立ができませんでした。`);
@@ -198,7 +188,7 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
                   passwordStrength.strength === 0 ? 'w-1/3 bg-red-500' : 
                   passwordStrength.strength === 1 ? 'w-2/3 bg-yellow-500' : 
                   'w-full bg-green-500'
-                }`} 
+                }`}
               />
             </div>
             <p className="text-xs text-neutral-300 mt-2">
