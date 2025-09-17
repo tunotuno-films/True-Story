@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import type { User } from '@supabase/supabase-js';
 import IndividualAuthForm from './IndividualAuthForm';
 import GoogleAuthForm from './GoogleAuthForm';
 import { X } from 'lucide-react';
@@ -7,7 +8,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import StoryForm from './StoryForm';
 import SubmissionSuccess from './SubmissionSuccess';
-import GuidelinesModal from './GuidelinesModal';
 
 interface TrueStoryProps {}
 
@@ -19,8 +19,6 @@ const TrueStory: React.FC<TrueStoryProps> = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [hasViewedGuidelines, setHasViewedGuidelines] = useState(false);
-  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [storyToSubmit, setStoryToSubmit] = useState<string | null>(null);
   const prevSession = useRef(session);
@@ -96,7 +94,6 @@ https://www.truestory.jp/
   const storyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const insertExampleToForm = () => {
-    if (!hasViewedGuidelines) return;
     setStory(exampleStory);
     localStorage.setItem(localStorageKey, exampleStory);
     setIsSubmitted(false);
@@ -109,15 +106,20 @@ https://www.truestory.jp/
     }, 0);
   };
 
-  const submitStory = async (storyText: string, user: any) => {
+  const submitStory = async (storyText: string, user: User) => {
     setIsSubmitting(true);
     setErrorMessage('');
     setShowError(false);
 
     try {
       const storyBlob = new Blob([storyText], { type: 'text/plain' });
-      const jstDate = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' });
-      const timestamp = jstDate.replace(/ /g, 'T').replace(/:/g, '-');
+      // const jstDate = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' });
+      // const timestamp = jstDate.replace(/ /g, 'T').replace(/:/g, '-');
+      // const fileName = `story-${timestamp}.txt`;
+      // Use ISO timestamp for consistency across browsers and environments.
+      // Replace ":" to make the timestamp safe for filenames.
+      const iso = new Date().toISOString(); // e.g. 2025-09-17T12:34:56.789Z
+      const timestamp = iso.replace(/:/g, '-'); // e.g. 2025-09-17T12-34-56.789Z
       const fileName = `story-${timestamp}.txt`;
       
       const { error: uploadError } = await supabase.storage
@@ -218,16 +220,6 @@ https://www.truestory.jp/
           </div>
         </div>
 
-        <div className="mb-8 text-center mt-8">
-          <button
-            type="button"
-            onClick={() => setShowGuidelinesModal(true)}
-            className={`${ hasViewedGuidelines ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-red-500 to-rose-500' } text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg`}
-          >
-            募集要項（PDF）を確認する
-          </button>
-        </div>
-
         {showError && (
           <div className="mb-6 p-4 bg-red-900/50 border-l-4 border-red-500 text-red-200 rounded-md">
             <div className="flex items-center">
@@ -247,7 +239,6 @@ https://www.truestory.jp/
             story={story}
             setStory={setStory}
             storyTextareaRef={storyTextareaRef}
-            hasViewedGuidelines={hasViewedGuidelines}
             insertExampleToForm={insertExampleToForm}
             handleStoryChange={handleStoryChange}
             handleSubmit={handleMainSubmit}
@@ -277,14 +268,6 @@ https://www.truestory.jp/
             </div>
           </div>
         )}
-
-        {/* PDFモーダル（切り出し） */}
-        <GuidelinesModal
-          open={showGuidelinesModal}
-          onClose={() => setShowGuidelinesModal(false)}
-          setHasViewedGuidelines={setHasViewedGuidelines}
-          hasViewedGuidelines={hasViewedGuidelines}
-        />
 
         <div className="text-center text-xs text-neutral-500 mt-4">
           <p>※投稿された物語は、運営が内容を確認した後、サイトや関連メディアで紹介させていただく場合があります。</p>

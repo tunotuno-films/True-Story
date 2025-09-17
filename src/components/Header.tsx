@@ -80,7 +80,7 @@ const Header: React.FC = () => {
   // ログイン中はマイページへ遷移、未ログイン時はメンバーシップへ
   const handleAuthButtonClick = () => {
     if (isLoggedIn) {
-      const userId = (session as any)?.user?.id;
+      const userId = session?.user?.id;
       if (userId) {
         navigate(`/users/member/${userId}`);
         return;
