@@ -1,8 +1,12 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
-// 直接指定の背景画像 URL（必要に応じて環境変数に戻してください）
-const BG_IMAGE_URL = 'https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/20250917_image1_ai.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvMjAyNTA5MTdfaW1hZ2UxX2FpLnBuZyIsImlhdCI6MTc1ODExNjM2MCwiZXhwIjo0ODgwMTgwMzYwfQ.Oju2kjr9_svYzy3ahRbdCp-7rbjzioqLjAxN2NHTGc0';
+// 環境変数から読み込み。無ければ public 配下のフォールバック画像を使用し、警告を出す
+const BG_IMAGE_URL = import.meta.env.VITE_BG_IMAGE_URL ?? '/images/default-bg.png';
+if (!import.meta.env.VITE_BG_IMAGE_URL) {
+  // 本番では環境変数を必ず設定してください（Vercel の Environment Variables を利用）
+  console.warn('VITE_BG_IMAGE_URL is not set. Using fallback image /images/20250917_image1_ai.png');
+}
 
 const Title: React.FC = () => {
   const scrollToSection = (sectionId: string) => {
