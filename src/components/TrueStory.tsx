@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import StoryForm from './StoryForm';
 import SubmissionSuccess from './SubmissionSuccess';
 import ConfirmationModal from './ConfirmationModal';
+import LoginRedirectModal from './LoginRedirectModal';
+import WelcomeBackModal from './WelcomeBackModal'; // 1. Import WelcomeBackModal
 
 interface TrueStoryProps {}
 
@@ -24,6 +26,8 @@ const TrueStory: React.FC<TrueStoryProps> = () => {
   const [hasAgreed, setHasAgreed] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [storyForModal, setStoryForModal] = useState('');
+  const [showLoginRedirectModal, setShowLoginRedirectModal] = useState(false);
+  const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false); // 2. Add state for new modal
 
   const localStorageKey = 'trueStoryDraft';
 
@@ -49,19 +53,28 @@ const TrueStory: React.FC<TrueStoryProps> = () => {
 すごく嬉しかったのですが、どうしても4月に感じたあの感覚が忘れられずに、気持ちには応えられないと断って、
 転校生の子のところへ向かいました・・・`;
 
-  // 投稿テンプレ（X向け）
   const tweetTemplate = `True Story【実話の物語】の実話募集中！
 皆さんの実話が映像作品になるかも！？
 以下のURLから参加しよう！
 https://www.truestory.jp/
 #truestory #実話の物語 #実話募集`;
 
+  // This effect handles showing the welcome back modal
+  useEffect(() => {
+    const shouldShowWelcomeBack = localStorage.getItem('showWelcomeBackModalAfterLogin') === 'true';
+    if (shouldShowWelcomeBack && session) {
+      console.log("TrueStory.tsx: Showing WelcomeBackModal.");
+      setShowWelcomeBackModal(true);
+      localStorage.removeItem('showWelcomeBackModalAfterLogin');
+    }
+  }, [session]);
+
+  // This effect handles showing the confirmation modal
   useEffect(() => {
     const shouldShowModalAfterLogin = localStorage.getItem('showConfirmModalAfterLogin') === 'true';
     if (shouldShowModalAfterLogin && session && story) {
-      setStoryForModal(story);
-      setShowConfirmModal(true);
-      localStorage.removeItem('showConfirmModalAfterLogin');
+      // We don't show it immediately, we wait for the welcome modal to close
+      // This will be handled by the `handleWelcomeBackClose` function
     }
   }, [session, story]);
 
@@ -106,13 +119,8 @@ https://www.truestory.jp/
 
     try {
       const storyBlob = new Blob([storyText], { type: 'text/plain' });
-      // const jstDate = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' });
-      // const timestamp = jstDate.replace(/ /g, 'T').replace(/:/g, '-');
-      // const fileName = `story-${timestamp}.txt`;
-      // Use ISO timestamp for consistency across browsers and environments.
-      // Replace ":" to make the timestamp safe for filenames.
-      const iso = new Date().toISOString(); // e.g. 2025-09-17T12:34:56.789Z
-      const timestamp = iso.replace(/:/g, '-'); // e.g. 2025-09-17T12-34-56.789Z
+      const iso = new Date().toISOString();
+      const timestamp = iso.replace(/:/g, '-');
       const fileName = `story-${timestamp}.txt`;
       
       const { error: uploadError } = await supabase.storage
@@ -155,10 +163,11 @@ https://www.truestory.jp/
     if (!session) {
       localStorage.setItem('pendingStorySubmission', 'true');
       localStorage.setItem('showConfirmModalAfterLogin', 'true');
+      localStorage.setItem('showWelcomeBackModalAfterLogin', 'true'); // 3. Set flag
       if (hasAgreed) {
         localStorage.setItem('storyFormAgreed', 'true');
       }
-      navigate('/users/member');
+      setShowLoginRedirectModal(true);
       return;
     }
     
@@ -176,6 +185,17 @@ https://www.truestory.jp/
     setShowAuthModal(false);
   };
 
+  // 5. Handle closing of welcome modal
+  const handleWelcomeBackClose = () => {
+    setShowWelcomeBackModal(false);
+    const shouldShowConfirm = localStorage.getItem('showConfirmModalAfterLogin') === 'true';
+    if (shouldShowConfirm && story) {
+        setStoryForModal(story);
+        setShowConfirmModal(true);
+        localStorage.removeItem('showConfirmModalAfterLogin');
+    }
+  };
+
   return (
     <section className="py-20 md:py-32 bg-neutral-900">
       <div className="container mx-auto px-6 md:px-12 max-w-4xl">
@@ -186,7 +206,8 @@ https://www.truestory.jp/
           あなたの「実話の物語」を教えてください。
         </p>
 
-        {/* 募集テーマの表示（シンプル：プレーン数字＋下線区切り） */}
+        {/* ... (rest of the JSX is the same) */}
+        
         <div className="max-w-3xl mx-auto mb-8">
           <div className="bg-neutral-800/40 border border-neutral-700 rounded-lg p-4 md:p-6">
             <h4 className="text-lg md:text-xl font-semibold text-white text-center mb-4">
@@ -289,6 +310,15 @@ https://www.truestory.jp/
         onConfirm={handleConfirmSubmit}
         title="物語の送信確認"
         story={storyForModal}
+      />
+      <LoginRedirectModal
+        isOpen={showLoginRedirectModal}
+        onClose={() => setShowLoginRedirectModal(false)}
+      />
+      {/* 6. Add WelcomeBackModal to JSX */}
+      <WelcomeBackModal
+        isOpen={showWelcomeBackModal}
+        onClose={handleWelcomeBackClose}
       />
     </section>
   );

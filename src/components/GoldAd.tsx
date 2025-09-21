@@ -28,8 +28,8 @@ const GoldAd: React.FC = () => {
     fetchGoldSponsors();
   }, []);
 
-  // ループ用に2倍配列
-  const loopSponsors = [...sponsors, ...sponsors];
+  // ループ用に配列を5倍に増やす
+  const loopSponsors = [...sponsors, ...sponsors, ...sponsors, ...sponsors, ...sponsors];
 
   return (
     <section id="gold-ad" className="py-8 bg-neutral-900">
@@ -71,7 +71,7 @@ const GoldAd: React.FC = () => {
         {`
           @keyframes gold-scroll {
             0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+            100% { transform: translateX(-20%); }
           }
           .animate-gold-scroll {
             /* ...existing code... */

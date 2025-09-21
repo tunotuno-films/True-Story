@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import PrivacyPolicy from '../components/PrivacyPolicy';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { robustSignOut, checkMemberExists } from '../utils/authUtils';
 
 const MyPage: React.FC = () => {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -15,6 +16,12 @@ const MyPage: React.FC = () => {
 
   const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
+
+  const handleSignOut = async () => {
+    console.log('handleSignOut called from User.tsx.');
+    await robustSignOut();
+    navigate('/'); // サインアウト後はトップページへ
+  };
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -48,9 +55,17 @@ const MyPage: React.FC = () => {
       // セッションが確立された後にlocalStorageをチェック
       const pendingSubmission = localStorage.getItem('pendingStorySubmission');
       if (pendingSubmission && session?.user) { // セッションがあることも確認
-        localStorage.removeItem('pendingStorySubmission');
-        navigate('/#truestoryform');
-        return;
+        // 個人会員情報が登録済みかチェック
+        const existingMember = await checkMemberExists(session.user.id);
+        if (existingMember && existingMember.user_type === 'individual') { // user_type を確認
+          localStorage.removeItem('pendingStorySubmission');
+          navigate('/#truestoryform');
+          return;
+        } else {
+          // 個人会員情報が未登録の場合は、追加情報フォームへリダイレクト
+          navigate(`/users/member/${session.user.id}`);
+          return;
+        }
       }
 
       if (session?.user) {
@@ -66,8 +81,8 @@ const MyPage: React.FC = () => {
           .maybeSingle();
 
         if (individualMember) {
-          console.log('User.tsx: Individual member found. Redirecting to /users/member/', individualMember.member_id);
-          navigate(`/users/member/${individualMember.member_id}`);
+          console.log('User.tsx: Individual member found. Redirecting to /users/member/', individualMember.auth_user_id);
+          navigate(`/users/member/${individualMember.auth_user_id}`);
           return;
         }
 
@@ -82,6 +97,13 @@ const MyPage: React.FC = () => {
         if (sponsorMember) {
           console.log('User.tsx: Sponsor member found. Redirecting to /users/sponsor/', currentUser.id);
           navigate(`/users/sponsor/${currentUser.id}`);
+          return;
+        }
+
+        // 新規登録ユーザーの場合、会員情報入力フォームへリダイレクト
+        if (!individualMember && !sponsorMember) {
+          console.log('User.tsx: New user detected. Redirecting to member registration form.');
+          navigate(`/users/member/${currentUser.id}`); // ここを修正
           return;
         }
 
@@ -163,6 +185,16 @@ const MyPage: React.FC = () => {
                 <p className="text-sm text-neutral-400">企業・団体の方はこちら</p>
               </div>
             </Link>
+          </div>
+
+          {/* 強制ログアウトボタンを追加 */}
+          <div className="absolute bottom-8 right-8">
+            <button
+              onClick={handleSignOut}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-300 text-sm"
+            >
+              ボタンが反応しない場合はこちらをクリックして下さい。
+            </button>
           </div>
         </div>
       </main>

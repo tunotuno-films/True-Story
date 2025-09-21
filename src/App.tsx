@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Title from './components/Title';
 import Introduction from './components/Introduction';
@@ -22,7 +22,7 @@ import { seoKeywords } from './constants';
 import GoldAd from './components/GoldAd';
 import { Analytics } from '@vercel/analytics/react';
 import SocialLinks from './components/SocialLinks';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext'; // Assuming this is the sponsor registration form
 
 // MainPageコンポーネントをApp関数の外に定義
 const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: {
@@ -111,23 +111,30 @@ const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: 
   );
 };
 
-function App() {
+const AppRoutes: React.FC = () => {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const navigate = useNavigate();
 
   const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
   return (
+    <Routes>
+      <Route path="/" element={<MainPage openPrivacyPolicy={openPrivacyPolicy} closePrivacyPolicy={closePrivacyPolicy} showPrivacyPolicy={showPrivacyPolicy} />} />
+      <Route path="/users" element={<MyPage />} />
+      <Route path="/users/member" element={<IndividualMyPage />} />
+      <Route path="/users/member/:userId" element={<IndividualMyPage />} />
+      <Route path="/users/sponsor" element={<SponsorPage />} />
+      <Route path="/users/sponsor/:id" element={<SponsorPage />} />
+    </Routes>
+  );
+};
+
+function App() {
+  return (
     <AuthProvider>
       <Router>
-        <Routes>
-          <Route path="/" element={<MainPage openPrivacyPolicy={openPrivacyPolicy} closePrivacyPolicy={closePrivacyPolicy} showPrivacyPolicy={showPrivacyPolicy} />} />
-          <Route path="/users" element={<MyPage />} />
-          <Route path="/users/member" element={<IndividualMyPage />} />
-          <Route path="/users/member/:userId" element={<IndividualMyPage />} />
-          <Route path="/users/sponsor" element={<SponsorPage />} />
-          <Route path="/users/sponsor/:id" element={<SponsorPage />} />
-        </Routes>
+        <AppRoutes />
         <Analytics />
       </Router>
     </AuthProvider>
