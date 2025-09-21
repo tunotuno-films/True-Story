@@ -175,8 +175,7 @@ const IndividualMyPage: React.FC = () => {
           setShowMinimalLoader(false);
         } else if (event === 'SIGNED_IN' && currentSession?.user) {
           console.log('Auth state change: SIGNED_IN.', currentSession.user.id);
-          // ログインイベント発生時、自分のページにリダイレクト
-          // このリダイレクトにより、新しいURLでコンポーネントが再マウントされ、useEffectが再実行される
+          // 通常のログイン時は自分のページにリダイレクト
           navigate(`/users/member/${currentSession.user.id}`);
         }
       }
@@ -201,6 +200,13 @@ const IndividualMyPage: React.FC = () => {
 
   const handleAuthSuccess = async (authUserId?: string) => {
     console.log('IndividualMyPage - handleAuthSuccess called. authUserId:', authUserId);
+    const pendingSubmission = localStorage.getItem('pendingStorySubmission');
+    if (pendingSubmission) {
+      localStorage.removeItem('pendingStorySubmission');
+      navigate('/#truestory');
+      return;
+    }
+
     if (authUserId) {
       console.log('handleAuthSuccess: Navigating to user ID page.', authUserId);
       navigate(`/users/member/${authUserId}`);

@@ -67,7 +67,7 @@ const Header: React.FC = () => {
   };
 
   const navItems = [
-    { id: 'truestory', label: 'TRUE STORY' },
+    { id: 'truestoryform', label: 'TRUE STORY' },
     { id: 'artist', label: 'ARTIST' },
     { id: 'crowdfunding', label: 'CROWDFUNDING' },
     { id: 'contact', label: 'CONTACT' },

@@ -1,10 +1,15 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
 
 interface TrueStoryProps {
   onShowPrivacyPolicy: () => void;
 }
 
 const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
+  const navigate = useNavigate();
+  const authContext = useContext(AuthContext);
+  const user = authContext ? authContext.user : null;
   const [story, setStory] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -140,6 +145,14 @@ const TrueStory: React.FC<TrueStoryProps> = ({ onShowPrivacyPolicy }) => {
   // メイン送信ボタン押下時
   const handleMainSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!user) {
+      // 未ログインの場合、フラグを立ててログインページへリダイレクト
+      localStorage.setItem('pendingStorySubmission', 'true');
+      navigate('/users/member');
+      return;
+    }
+
     if (!story.trim()) {
       showErrorWithTimeout('フォームを入力してください。');
       return;

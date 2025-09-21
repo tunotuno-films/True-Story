@@ -45,6 +45,14 @@ const MyPage: React.FC = () => {
         console.error('User.tsx: Error handling auth callback hash:', e);
       }
 
+      // セッションが確立された後にlocalStorageをチェック
+      const pendingSubmission = localStorage.getItem('pendingStorySubmission');
+      if (pendingSubmission && session?.user) { // セッションがあることも確認
+        localStorage.removeItem('pendingStorySubmission');
+        navigate('/#truestoryform');
+        return;
+      }
+
       if (session?.user) {
         console.log('User.tsx: Session user found.', session.user.id);
         const currentUser = session.user;
@@ -54,7 +62,8 @@ const MyPage: React.FC = () => {
           .from('individual_members')
           .select('*')
           .eq('auth_user_id', currentUser.id)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         if (individualMember) {
           console.log('User.tsx: Individual member found. Redirecting to /users/member/', individualMember.member_id);
@@ -67,7 +76,8 @@ const MyPage: React.FC = () => {
           .from('sponsor_members')
           .select('*')
           .eq('auth_user_id', currentUser.id)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         if (sponsorMember) {
           console.log('User.tsx: Sponsor member found. Redirecting to /users/sponsor/', currentUser.id);
