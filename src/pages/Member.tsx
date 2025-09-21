@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { robustSignOut } from '../utils/authUtils';
+import { robustSignOut, checkMemberExists } from '../utils/authUtils';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PrivacyPolicy from '../components/PrivacyPolicy';
 import IndividualAuthForm from '../components/IndividualAuthForm';
+import TrueStory from '../components/TrueStory'; // Import TrueStory component
 import { useAuth } from '../contexts/AuthContext';
 
 interface User {
@@ -26,6 +27,14 @@ const IndividualMyPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const isSigningOut = useRef(false);
   const { session, loading: authLoading } = useAuth();
+  const [subtitle, setSubtitle] = useState('メンバーとしてログインまたは新規登録');
+
+  useEffect(() => {
+    const pendingSubmission = localStorage.getItem('pendingStorySubmission');
+    if (pendingSubmission) {
+      setSubtitle('ログインまたは新規登録して物語の送信を完了する');
+    }
+  }, []);
 
   // 投票履歴を取得する関数
   const fetchVoteHistory = async (authUserId: string) => {
@@ -80,6 +89,12 @@ const IndividualMyPage: React.FC = () => {
       return; // AuthContextの初期ロード中は待機
     }
 
+    // ここで isLoading を false に設定する条件を追加
+    if (session?.user && userId) { // session があり、かつ userId が URL に含まれている場合
+      setIsLoading(false);
+      setShowMinimalLoader(false);
+    }
+
     let loadingTimeout: NodeJS.Timeout;
     let minimalLoaderTimeout: NodeJS.Timeout;
     let hasCompletedCheck = false;
@@ -114,6 +129,8 @@ const IndividualMyPage: React.FC = () => {
           // URLの userId が存在しない、または現在のユーザーIDと一致しない場合
           if (!userId || userId !== currentUser.id) {
             console.log('checkUserStatus: URL userId missing or mismatch. Redirecting to own page.', { currentUserId: currentUser.id, urlUserId: userId });
+            setIsLoading(false); // 追加
+            setShowMinimalLoader(false); // 追加
             navigate(`/users/member/${currentUser.id}`);
             return; // リダイレクト後にこのuseEffectの実行を停止
           }
@@ -124,7 +141,7 @@ const IndividualMyPage: React.FC = () => {
             .from('individual_members')
             .select('*')
             .eq('auth_user_id', currentUser.id)
-            .single();
+            .maybeSingle(); // Changed from .single() to .maybeSingle()
 
           if (individualMember) {
             console.log('checkUserStatus: Individual member data found.', individualMember);
@@ -137,9 +154,20 @@ const IndividualMyPage: React.FC = () => {
             });
             await fetchVoteHistory(currentUser.id);
           } else {
-            console.log('checkUserStatus: Authenticated but not an individual member. Redirecting to user type selection.');
-            navigate('/users');
-            return; // リダイレクト後にこのuseEffectの実行を停止
+            const isGoogleAuth = currentUser.app_metadata?.provider === 'google';
+            if (isGoogleAuth) {
+              console.log('checkUserStatus: Authenticated via Google, but not an individual member. Allowing IndividualAuthForm to render.');
+              // Do NOT set user to null here. Let the rendering logic below handle it.
+              setIsLoading(false);
+              setShowMinimalLoader(false);
+              // Do not return here, allow rendering of TrueStory form
+            } else {
+              console.log('checkUserStatus: Authenticated but not an individual member (not Google Auth). Redirecting to user type selection.');
+              setIsLoading(false); // 追加
+              setShowMinimalLoader(false); // 追加
+              navigate('/users');
+              return; // リダイレクト後にこのuseEffectの実行を停止
+            }
           }
         }
         
@@ -202,9 +230,16 @@ const IndividualMyPage: React.FC = () => {
     console.log('IndividualMyPage - handleAuthSuccess called. authUserId:', authUserId);
     const pendingSubmission = localStorage.getItem('pendingStorySubmission');
     if (pendingSubmission) {
-      localStorage.removeItem('pendingStorySubmission');
-      navigate('/#truestory');
-      return;
+      if (authUserId) {
+        const existingMember = await checkMemberExists(authUserId);
+        if (existingMember && existingMember.user_type === 'individual') { // user_type を確認
+          localStorage.removeItem('pendingStorySubmission');
+          navigate('/#truestoryform');
+          return;
+        }
+      }
+      // 個人会員情報が未登録の場合は、追加情報フォームを表示し続ける
+      return; // pendingSubmission があるが個人会員でない場合はここで処理を終了し、追加情報フォームを表示
     }
 
     if (authUserId) {
@@ -226,10 +261,10 @@ const IndividualMyPage: React.FC = () => {
   };
 
   // ローディング状態の表示
-  if (isLoading || authLoading) {
-    console.log('Rendering: Loading state.', { isLoading, authLoading });
+  if (isLoading || authLoading) { // 修正
+    console.log('Rendering: Loading state.', { isLoading, authLoading, sessionExists: !!session?.user, userExists: !!user });
     return (
-      <div className="min-h-screen bg-neutral-900 text-white">
+      <div className="min-h-screen bg-neutral-900 text-white relative">
         <Header />
         <main className="container mx-auto px-4 py-16">
           <div className="text-center">
@@ -237,8 +272,18 @@ const IndividualMyPage: React.FC = () => {
             {showMinimalLoader && (
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             )}
+            <p className="text-neutral-300 mt-4">ユーザー情報を読み込み中...</p>
           </div>
         </main>
+        {/* 強制ログアウトボタン */}
+        <div className="absolute bottom-32 right-20">
+          <button
+            onClick={handleSignOut}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-300 text-sm"
+          >
+            強制ログアウト
+          </button>
+        </div>
         <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
       </div>
     );
@@ -254,7 +299,7 @@ const IndividualMyPage: React.FC = () => {
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold font-noto mb-6">メンバーシップ</h1>
-              <p className="text-neutral-300">メンバーとしてログインまたは新規登録</p>
+              <p className="text-neutral-300">{subtitle}</p>
               <div className="mt-4">
                 <Link to="/users" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
                   アカウントの種類選択に戻る
@@ -270,20 +315,21 @@ const IndividualMyPage: React.FC = () => {
     );
   }
 
-  // ログイン済みだがユーザー情報がまだロードされていない場合（リダイレクト後など）
-  if (session?.user && !user) {
-    console.log('Rendering: Logged in but user data not loaded yet.');
+  // Google Authで認証済みだが、個人会員情報が未登録の場合、追加情報フォームを表示
+  if (session?.user && !user && session.user.app_metadata?.provider === 'google') {
+    console.log('Rendering: Google Auth user, no individual member data. Showing additional info form.');
     return (
       <div className="min-h-screen bg-neutral-900 text-white">
         <Header />
         <main className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold font-noto mb-8">マイページ</h1>
-            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-neutral-300 mt-4">ユーザー情報を読み込み中...</p>
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold font-noto mb-8">個人会員登録</h1>
+            <p className="text-neutral-300">追加情報を入力してください</p>
           </div>
+          <IndividualAuthForm onAuthSuccess={handleAuthSuccess} />
         </main>
         <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
+        {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
       </div>
     );
   }

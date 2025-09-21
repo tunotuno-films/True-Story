@@ -24,7 +24,7 @@ const Title: React.FC = () => {
       {/* 黒いオーバーレイ */}
       {/* <div className="absolute inset-0 bg-black/70 z-0" /> */}
       {/* モバイルで少し上に移動: -translate-y-6 (mobile)、md以上で元位置に戻す */}
-      <div className="relative z-10 p-6 md:p-12 w-full transform -translate-y-12 md:translate-y-0">
+      <div className="relative z-10 p-6 md:p-12 w-full transform -translate-y-20 md:-translate-y-8">
         <h2 className="font-noto text-lg md:text-3xl font-bold text-shadow mb-2 md:mb-4">
           あなたの物語が、未来をつくる。
         </h2>

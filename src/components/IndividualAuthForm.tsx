@@ -93,11 +93,11 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
                 setFormData(prev => ({
                   ...prev,
                   email: user.email || '',
-                  nickname: ''
+                  nickname: user.user_metadata?.full_name || user.user_metadata?.name || ''
                 }));
                 setShowAdditionalInfo(true);
                 setIsCheckingMember(false);
-              } else if (existingMember.userType === 'individual') {
+              } else if (existingMember.user_type === 'individual') {
                 console.log('IndividualAuthForm - Existing individual member found, proceeding with login');
                 const userName = existingMember.nickname || `${existingMember.last_name} ${existingMember.first_name}`;
                 setIsCheckingMember(false);
@@ -179,10 +179,10 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             setFormData(prev => ({
               ...prev,
               email: user.email || '',
-              nickname: ''
+              nickname: user.user_metadata?.full_name || user.user_metadata?.name || ''
             }));
             setShowAdditionalInfo(true);
-          } else if (existingMember.userType === 'individual') {
+          } else if (existingMember.user_type === 'individual') {
             console.log('IndividualAuthForm - Existing individual member for current session');
             const userName = existingMember.nickname || `${existingMember.last_name} ${existingMember.first_name}`;
             onAuthSuccess(user.email || '', userName, user.id);
@@ -231,7 +231,7 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             const pendingSubmission = localStorage.getItem('pendingStorySubmission');
             if (pendingSubmission) {
               localStorage.removeItem('pendingStorySubmission');
-              navigate('/#truestory');
+              navigate('/#truestoryform');
             } else {
               const userName = individualMember.nickname ||
                   `${individualMember.last_name || ''} ${individualMember.first_name || ''}`.trim() ||
@@ -396,7 +396,7 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       const pendingSubmission = localStorage.getItem('pendingStorySubmission');
       if (pendingSubmission) {
         localStorage.removeItem('pendingStorySubmission');
-        navigate('/#truestory');
+        navigate('/#truestoryform');
       } else {
         onAuthSuccess(targetUser.email, userName, targetUser.id);
       }
