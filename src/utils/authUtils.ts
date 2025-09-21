@@ -57,7 +57,8 @@ export const checkMemberExists = async (userId: string) => {
       .from('individual_members')
       .select('*')
       .eq('auth_user_id', userId)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     if (individualMember) {
       return { ...individualMember, user_type: 'individual' };
@@ -68,7 +69,8 @@ export const checkMemberExists = async (userId: string) => {
       .from('sponsor_members')
       .select('*')
       .eq('auth_user_id', userId)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     if (sponsorMember) {
       return { ...sponsorMember, user_type: 'sponsor' };

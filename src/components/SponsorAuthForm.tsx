@@ -54,20 +54,73 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           return;
         }
 
-        const { data: existingMember } = await supabase
-          .from('sponsor_members')
-          .select('*')
-          .eq('auth_user_id', user.id)
-          .single();
+        // 1. Check if the user is a sponsor member
+        const { data: sponsorMember, error: sponsorError } = await supabase
+            .from('sponsor_members')
+            .select('*')
+            .eq('auth_user_id', user.id)
+            .maybeSingle();
 
-        const userName = `${existingMember?.last_name || ''} ${existingMember?.first_name || ''}`.trim() ||
-          user.user_metadata?.full_name ||
-          user.email || '';
+        if (sponsorError) throw sponsorError;
 
-        onAuthSuccess(user.email || '', userName, user.id);
+        if (sponsorMember) {
+            // Login success
+            const userName = `${sponsorMember.last_name || ''} ${sponsorMember.first_name || ''}`.trim() ||
+                user.user_metadata?.full_name ||
+                user.email || '';
+            onAuthSuccess(user.email || '', userName, user.id);
+            return;
+        }
 
+        // 2. If not a sponsor member, check if they are an individual member
+        const { data: individualMember, error: individualError } = await supabase
+            .from('individual_members')
+            .select('id')
+            .eq('auth_user_id', user.id)
+            .maybeSingle();
+
+        if (individualError) throw individualError;
+
+        if (individualMember) {
+            // User is an individual, show error and sign out
+            alert('このアカウントは個人アカウントです。スポンサーとしてログインするには、スポンサーアカウントをご利用ください。');
+            await supabase.auth.signOut();
+            return;
+        }
+
+        // 3. If user exists in neither table, it's an error for sponsors,
+        // because sponsor signup process should be atomic.
+        // Unlike individual members, there's no separate "additional info" step for sponsors after email auth.
+        alert('ログインに失敗しました。有効なスポンサーアカウントではありません。');
+        await supabase.auth.signOut();
         return;
       } else { // signup
+        // Check for duplicate email in both tables
+        const { data: existingIndividual, error: individualError } = await supabase
+          .from('individual_members')
+          .select('email')
+          .eq('email', formData.email)
+          .maybeSingle();
+
+        if (individualError) {
+          throw new Error('メールアドレスの確認中にエラーが発生しました。');
+        }
+
+        const { data: existingSponsor, error: sponsorError } = await supabase
+          .from('sponsor_members')
+          .select('email')
+          .eq('email', formData.email)
+          .maybeSingle();
+
+        if (sponsorError) {
+          throw new Error('メールアドレスの確認中にエラーが発生しました。');
+        }
+
+        if (existingIndividual || existingSponsor) {
+          alert('このメールアドレスはすでに登録されています。');
+          return;
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password ?? '',

@@ -30,7 +30,7 @@ const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: 
   closePrivacyPolicy: () => void;
   showPrivacyPolicy: boolean;
 }) => {
-  // ハッシュが #truestory のときに該当要素へスクロールする（初回 & hashchange 対応）
+  // ハッシュが #truestoryform のときに該当要素へスクロールする（初回 & hashchange 対応）
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -49,10 +49,10 @@ const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: 
     };
 
     // 要素がまだ存在しない場合に備えてリトライする
-    const scrollIfTruestory = () => {
-      if (window.location.hash === '#truestory') {
+    const scrollIfTruestoryForm = () => {
+      if (window.location.hash === '#truestoryform') {
         const tryScroll = (tries = 0) => {
-          const el = document.getElementById('truestory');
+          const el = document.getElementById('truestoryform');
           if (el) {
             scrollToElementWithOffset(el);
           } else if (tries < 8) {
@@ -65,12 +65,12 @@ const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: 
     };
 
     // 初回チェック
-    scrollIfTruestory();
+    scrollIfTruestoryForm();
     // SPA 内でハッシュが変わった時にも対応
-    window.addEventListener('hashchange', scrollIfTruestory);
+    window.addEventListener('hashchange', scrollIfTruestoryForm);
 
     return () => {
-      window.removeEventListener('hashchange', scrollIfTruestory);
+      window.removeEventListener('hashchange', scrollIfTruestoryForm);
     };
   }, []);
 

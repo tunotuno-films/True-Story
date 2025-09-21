@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import StoryForm from './StoryForm';
 import SubmissionSuccess from './SubmissionSuccess';
+import ConfirmationModal from './ConfirmationModal';
 
 interface TrueStoryProps {}
 
@@ -20,8 +21,9 @@ const TrueStory: React.FC<TrueStoryProps> = () => {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [storyToSubmit, setStoryToSubmit] = useState<string | null>(null);
-  const prevSession = useRef(session);
+  const [hasAgreed, setHasAgreed] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [storyForModal, setStoryForModal] = useState('');
 
   const localStorageKey = 'trueStoryDraft';
 
@@ -55,22 +57,13 @@ https://www.truestory.jp/
 #truestory #実話の物語 #実話募集`;
 
   useEffect(() => {
-    // ログイン状態が変化したことを検知
-    if (!prevSession.current && session && storyToSubmit) {
-      submitStory(storyToSubmit, session.user);
-      setStoryToSubmit(null);
-      
-      // ログイン後にスクロール
-      setTimeout(() => {
-        const section = document.getElementById('truestory');
-        if (section) {
-          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
+    const shouldShowModalAfterLogin = localStorage.getItem('showConfirmModalAfterLogin') === 'true';
+    if (shouldShowModalAfterLogin && session && story) {
+      setStoryForModal(story);
+      setShowConfirmModal(true);
+      localStorage.removeItem('showConfirmModalAfterLogin');
     }
-    // 現在のセッションを保存
-    prevSession.current = session;
-  }, [session, storyToSubmit]);
+  }, [session, story]);
 
   const showErrorWithTimeout = (message: string) => {
     setErrorMessage(message);
@@ -157,13 +150,26 @@ https://www.truestory.jp/
       return;
     }
 
+    setStoryForModal(story);
+
     if (!session) {
-      setStoryToSubmit(story);
-      navigate('/users?redirect=home');
+      localStorage.setItem('pendingStorySubmission', 'true');
+      localStorage.setItem('showConfirmModalAfterLogin', 'true');
+      if (hasAgreed) {
+        localStorage.setItem('storyFormAgreed', 'true');
+      }
+      navigate('/users/member');
       return;
     }
     
-    submitStory(story, session.user);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = () => {
+    if (session) {
+      submitStory(storyForModal, session.user);
+    }
+    setShowConfirmModal(false);
   };
 
   const handleAuthSuccess = () => {
@@ -171,7 +177,7 @@ https://www.truestory.jp/
   };
 
   return (
-    <section id="truestory" className="py-20 md:py-32 bg-neutral-900">
+    <section className="py-20 md:py-32 bg-neutral-900">
       <div className="container mx-auto px-6 md:px-12 max-w-4xl">
         <h2 className="section-title text-4xl md:text-5xl text-center mb-4 gradient-text">
           TRUE STORY
@@ -244,6 +250,8 @@ https://www.truestory.jp/
             handleSubmit={handleMainSubmit}
             isSubmitting={isSubmitting}
             showError={showError}
+            hasAgreed={hasAgreed}
+            setHasAgreed={setHasAgreed}
           />
         )}
 
@@ -275,6 +283,13 @@ https://www.truestory.jp/
           <p>入力内容はブラウザに自動で一時保存されます。ページを更新したり、後で書き直すことも可能です。</p>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmSubmit}
+        title="物語の送信確認"
+        story={storyForModal}
+      />
     </section>
   );
 };

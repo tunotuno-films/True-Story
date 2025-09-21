@@ -217,36 +217,86 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           return;
         }
 
-        const { data: existingMember, error: memberError } = await supabase
-          .from('individual_members')
-          .select('*')
-          .eq('auth_user_id', user.id)
-          .single();
+        // 1. Check if the user is an individual member
+        const { data: individualMember, error: individualError } = await supabase
+            .from('individual_members')
+            .select('*')
+            .eq('auth_user_id', user.id)
+            .maybeSingle();
 
-        if (memberError && memberError.code === 'PGRST116') {
-          setAuthenticatedUser(user);
-          setFormData(prev => ({
+        if (individualError) throw individualError;
+
+        if (individualMember) {
+            // Login success
+            const pendingSubmission = localStorage.getItem('pendingStorySubmission');
+            if (pendingSubmission) {
+              localStorage.removeItem('pendingStorySubmission');
+              navigate('/#truestory');
+            } else {
+              const userName = individualMember.nickname ||
+                  `${individualMember.last_name || ''} ${individualMember.first_name || ''}`.trim() ||
+                  user.user_metadata?.full_name ||
+                  user.email || '';
+              onAuthSuccess(user.email || '', userName, user.id);
+            }
+            return;
+        }
+
+        // 2. If not an individual member, check if they are a sponsor member
+        const { data: sponsorMember, error: sponsorError } = await supabase
+            .from('sponsor_members')
+            .select('id')
+            .eq('auth_user_id', user.id)
+            .maybeSingle();
+
+        if (sponsorError) throw sponsorError;
+
+        if (sponsorMember) {
+            // User is a sponsor, show error and sign out
+            alert('このアカウントはスポンサーアカウントです。個人会員としてログインするには、個人アカウントをご利用ください。');
+            await supabase.auth.signOut();
+            return;
+        }
+        
+        // 3. If user exists in neither table, proceed to additional info form
+        // This case handles users who have completed email verification but not yet created a member profile.
+        setAuthenticatedUser(user);
+        setFormData(prev => ({
             ...prev,
             email: user.email || '',
             lastName: user.user_metadata?.last_name || '',
             firstName: user.user_metadata?.first_name || '',
             nickname: user.user_metadata?.nickname || ''
-          }));
-          setShowAdditionalInfo(true);
+        }));
+        setShowAdditionalInfo(true);
+        return;
+      } else { // signup
+        // Check for duplicate email in both tables
+        const { data: existingIndividual, error: individualError } = await supabase
+          .from('individual_members')
+          .select('email')
+          .eq('email', formData.email)
+          .maybeSingle();
+
+        if (individualError) {
+          throw new Error('メールアドレスの確認中にエラーが発生しました。');
+        }
+
+        const { data: existingSponsor, error: sponsorError } = await supabase
+          .from('sponsor_members')
+          .select('email')
+          .eq('email', formData.email)
+          .maybeSingle();
+
+        if (sponsorError) {
+          throw new Error('メールアドレスの確認中にエラーが発生しました。');
+        }
+
+        if (existingIndividual || existingSponsor) {
+          alert('このメールアドレスはすでに登録されています。');
           return;
         }
 
-        if (memberError) throw memberError;
-
-        const userName = existingMember?.nickname ||
-          `${existingMember?.last_name || ''} ${existingMember?.first_name || ''}`.trim() ||
-          user.user_metadata?.full_name ||
-          user.email || '';
-
-        onAuthSuccess(user.email || '', userName, user.id);
-
-        return;
-      } else { // signup
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password || '',
@@ -342,7 +392,14 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       setShowAdditionalInfo(false);
       setGoogleUser(null);
       setAuthenticatedUser(null);
-      onAuthSuccess(targetUser.email, userName, targetUser.id);
+
+      const pendingSubmission = localStorage.getItem('pendingStorySubmission');
+      if (pendingSubmission) {
+        localStorage.removeItem('pendingStorySubmission');
+        navigate('/#truestory');
+      } else {
+        onAuthSuccess(targetUser.email, userName, targetUser.id);
+      }
     } catch (err) {
       console.error('Additional info submission error:', err);
       alert('追加情報の保存でエラーが発生しました: ' + ((err as Error).message || String(err)));

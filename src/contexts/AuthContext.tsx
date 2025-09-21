@@ -8,7 +8,7 @@ interface AuthContextType {
   loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ 
+export const AuthContext = createContext<AuthContextType>({ 
   session: null, 
   user: null, 
   loading: true 

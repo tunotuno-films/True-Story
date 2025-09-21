@@ -59,7 +59,7 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
         .from('individual_members')
         .select('id')
         .eq('auth_user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
       if (individualMember) {
         setUserType('individual');
@@ -71,7 +71,7 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
         .from('sponsor_members')
         .select('id')
         .eq('auth_user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
       if (sponsorMember) {
         setUserType('sponsor');
@@ -144,7 +144,7 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
 
           <div className="text-center mt-16">
             <button
-              onClick={handleVoteButtonClick}
+              // onClick={handleVoteButtonClick}
               className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-3 px-8 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg"
             >
               coming soon

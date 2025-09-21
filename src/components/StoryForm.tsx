@@ -11,6 +11,8 @@ interface Props {
   handleSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
   showError: boolean;
+  hasAgreed: boolean;
+  setHasAgreed: (agreed: boolean) => void;
 }
 
 const StoryForm: React.FC<Props> = ({
@@ -22,8 +24,9 @@ const StoryForm: React.FC<Props> = ({
   handleSubmit,
   isSubmitting,
   showError,
+  hasAgreed,
+  setHasAgreed,
 }) => {
-  const [hasAgreed, setHasAgreed] = useState(false);
   const [canAgree, setCanAgree] = useState(false);
   const noticeRef = useRef<HTMLDivElement | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -74,6 +77,15 @@ const StoryForm: React.FC<Props> = ({
       el.removeEventListener('touchmove', touchMoveHandler);
     };
   }, [noticeRef]);
+
+  useEffect(() => {
+    const agreed = localStorage.getItem('storyFormAgreed');
+    if (agreed === 'true') {
+      setHasAgreed(true);
+      setCanAgree(true);
+      localStorage.removeItem('storyFormAgreed'); // 一度読み込んだら削除
+    }
+  }, [setHasAgreed]);
 
   return (
     <>
@@ -140,7 +152,7 @@ const StoryForm: React.FC<Props> = ({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        <form id="truestoryform" onSubmit={handleSubmit} className="flex flex-col h-full">
           <h4 className="text-left text-xl text-white mb-3 font-bold">応募フォーム</h4>
           <div className="relative flex-grow">
             <textarea
@@ -148,7 +160,7 @@ const StoryForm: React.FC<Props> = ({
               value={story}
               onChange={handleStoryChange}
               placeholder="ここにあなたの物語を記入してください..."
-              className={`w-full p-4 bg-neutral-900/50 border ${showError ? 'border-red-500' : 'border-dashed border-neutral-600'} rounded-lg text-neutral-300 text-lg min-h-[600px] resize-none`}
+              className={`w-full p-4 bg-neutral-900/50 border ${showError ? 'border-red-500' : 'border-emerald-500'} rounded-lg text-neutral-300 text-lg min-h-[600px] resize-none`}
               disabled={!hasAgreed}
             />
             {!hasAgreed && (
