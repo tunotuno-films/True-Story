@@ -210,9 +210,30 @@ https://www.truestory.jp/
         
         <div className="max-w-3xl mx-auto mb-8">
           <div className="bg-neutral-800/40 border border-neutral-700 rounded-lg p-4 md:p-6">
-            <h4 className="text-lg md:text-xl font-semibold text-white text-center mb-4">
-              今回募集するテーマは5つ！
-            </h4>
+            <div className="flex flex-col mb-4 relative">
+              <h4 className="text-lg md:text-xl font-semibold text-white text-center py-4">
+                今回募集するテーマは5つ！
+              </h4>
+              <div className="mt-2 flex justify-center md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 md:mt-0">
+                {/* 環境変数から読み込み。無ければ public 配下のフォールバック画像を使用し、警告を出す */}
+                {(() => {
+                  const QUO_CARD_IMAGE_URL = import.meta.env.VITE_QUO_CARD_IMAGE_URL ?? 'https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/st050011_quosmile_silver.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvc3QwNTAwMTFfcXVvc21pbGVfc2lsdmVyLmpwZyIsImlhdCI6MTc1ODUwOTM5NywiZXhwIjo0ODgwNTczMzk3fQ.vhZLZ8wklXizfh0WE24p6W9C5DE7m8RNs8MS4w5vU5c';
+                  if (!import.meta.env.VITE_QUO_CARD_IMAGE_URL) {
+                    console.warn('VITE_QUO_CARD_IMAGE_URL is not set. Using fallback image from Supabase storage.');
+                  }
+                  return (
+                    <img
+                      src={QUO_CARD_IMAGE_URL}
+                      alt="QUOカード"
+                      className="h-auto rounded-lg shadow-lg max-w-[80px] md:max-w-[100px]"
+                    />
+                  );
+                })()}
+              </div>
+            </div>
+            <p className="text-center text-neutral-300 text-base mb-4">
+              ご提供いただきました実話が当選された場合、謝礼として5,000円分のQUOカードを贈呈！
+            </p>
 
             <div className="divide-y divide-neutral-700">
               <div className="py-3 flex items-center gap-4">
@@ -243,6 +264,9 @@ https://www.truestory.jp/
 
             <p className="text-neutral-400 text-sm text-center mt-4">
               この5つのテーマから募集を行い、最終的に1つの物語を映像作品にします！
+            </p>
+            <p className="text-neutral-400 text-xs text-center mt-2">
+              ※ご応募いただく実話は、上記5つのテーマのうちいずれか1つに沿った内容でお願いいたします。
             </p>
           </div>
         </div>
@@ -299,9 +323,8 @@ https://www.truestory.jp/
         )}
 
         <div className="text-center text-xs text-neutral-500 mt-4">
-          <p>※投稿された物語は、運営が内容を確認した後、サイトや関連メディアで紹介させていただく場合があります。</p>
           <p>個人を特定できる情報は含めないようご注意ください。</p>
-          <p>入力内容はブラウザに自動で一時保存されます。ページを更新したり、後で書き直すことも可能です。</p>
+          <p>「この物語を送信する」ボタンを押すことにより、<a href="#privacy-policy" className="text-cyan-400 hover:underline">個人情報の取り扱い</a>について同意したものとみなします。</p>
         </div>
       </div>
       <ConfirmationModal

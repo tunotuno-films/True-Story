@@ -1,4 +1,6 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faYoutube, faInstagram } from '@fortawesome/free-brands-svg-icons';
 
 const Message: React.FC = () => {
   return (
@@ -25,7 +27,27 @@ const Message: React.FC = () => {
             <p className="font-noto text-base leading-loose text-neutral-300">
               だからこそ、我々制作関係者だけではなく、音楽を聴いてくれる皆さんと、映像を観てくれる皆さんと一緒にストーリーを創りたいと思っています！
             </p>
-            <p className="font-noto text-right mt-6 font-bold text-lg">Hiroki Ando</p>
+            <div className="flex items-center justify-end mt-6">
+              <a
+                href="https://www.instagram.com/hiropon_films/" // Placeholder link
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="text-white hover:text-neutral-400 transition-colors mr-3"
+              >
+                <FontAwesomeIcon icon={faInstagram} className="w-5 h-5 align-middle" />
+              </a>
+              <a
+                href="https://www.youtube.com/@HIROPONFilms" // Placeholder link
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="text-white hover:text-neutral-400 transition-colors mr-3"
+              >
+                <FontAwesomeIcon icon={faYoutube} className="w-5 h-5 align-middle" />
+              </a>
+              <p className="font-noto font-bold text-lg leading-none">Hiroki Ando</p>
+            </div>
           </div>
         </div>
         {/* 2人目 */}
@@ -39,12 +61,35 @@ const Message: React.FC = () => {
           </div>
           <div className="md:w-2/3">
             <p className="font-noto text-base leading-loose text-neutral-300 mb-6">
-              True Story【実話の物語】のプロジェクトに参加できてとても光栄です。実話を通じて多くの人に感動を届けたいと思っています。
+              日常で感じる喜び、悲しみ、憎しみ、怒り。
+              <br />
+              そんな気持ちを音に想いを込めて、物語とともにお届けしたいと思います。
+              <br />
+              皆さまの心に少しでも響いてもらえたら幸いです。
+              <br />
+              応援よろしくお願いいたします。
             </p>
-            <p className="font-noto text-base leading-loose text-neutral-300 mb-6">
-              皆さんと一緒に新しい物語を紡いでいけることを楽しみにしています。応援よろしくお願いします！
-            </p>
-            <p className="font-noto text-right mt-6 font-bold text-lg">翔馬-Shoma</p>
+            <div className="flex items-center justify-end mt-6">
+              <a
+                href="https://www.instagram.com/sho_m.pf/" // Placeholder link
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="text-white hover:text-neutral-400 transition-colors mr-3"
+              >
+                <FontAwesomeIcon icon={faInstagram} className="w-5 h-5 align-middle" />
+              </a>
+              <a
+                href="https://www.youtube.com/@ShomaPiano" // Placeholder link
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="text-white hover:text-neutral-400 transition-colors mr-3"
+              >
+                <FontAwesomeIcon icon={faYoutube} className="w-5 h-5 align-middle" />
+              </a>
+              <p className="font-noto font-bold text-lg leading-none">翔馬-Shoma</p>
+            </div>
           </div>
         </div>
       </div>

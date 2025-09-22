@@ -13,6 +13,7 @@ import {
   robustSignOut // 追加
 } from '../utils/authUtils';
 import { useNavigate } from 'react-router-dom'; // 追加
+import LoginErrorModal from './LoginErrorModal'; // 追加
 
 const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -33,6 +34,8 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   });
   const [googleUser, setGoogleUser] = useState<any>(null); // 追加
   const [isCheckingMember, setIsCheckingMember] = useState(false); // 追加
+  const [showLoginErrorModal, setShowLoginErrorModal] = useState(false); // 追加
+  const [loginErrorMessage, setLoginErrorMessage] = useState(''); // 追加
   const navigate = useNavigate(); // 追加
 
   const passwordStrength = calculatePasswordStrength(formData.password || '');
@@ -213,7 +216,8 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
         if (error) throw error;
         const user = data?.user;
         if (!user) {
-          alert('ログインに失敗しました。');
+          setLoginErrorMessage('ログインに失敗しました。');
+          setShowLoginErrorModal(true);
           return;
         }
 
@@ -253,7 +257,8 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
 
         if (sponsorMember) {
             // User is a sponsor, show error and sign out
-            alert('このアカウントはスポンサーアカウントです。個人会員としてログインするには、個人アカウントをご利用ください。');
+            setLoginErrorMessage('このアカウントはスポンサーアカウントです。個人会員としてログインするには、個人アカウントをご利用ください。');
+            setShowLoginErrorModal(true);
             await supabase.auth.signOut();
             return;
         }
@@ -293,7 +298,8 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
         }
 
         if (existingIndividual || existingSponsor) {
-          alert('このメールアドレスはすでに登録されています。');
+          setLoginErrorMessage('このメールアドレスはすでに登録されています。');
+          setShowLoginErrorModal(true);
           return;
         }
 
@@ -315,7 +321,8 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
         const user = data?.user;
         
         if (!user) {
-          alert('ユーザー登録に失敗しました。');
+          setLoginErrorMessage('ユーザー登録に失敗しました。');
+          setShowLoginErrorModal(true);
           return;
         }
         
@@ -352,7 +359,8 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       }
     } catch (err) {
       console.error('Authentication error:', err);
-      alert('認証中にエラーが発生しました: ' + ((err as Error).message || String(err)));
+      setLoginErrorMessage('認証中にエラーが発生しました: ' + ((err as Error).message || String(err)));
+      setShowLoginErrorModal(true);
     }
   };
 
@@ -402,7 +410,8 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       }
     } catch (err) {
       console.error('Additional info submission error:', err);
-      alert('追加情報の保存でエラーが発生しました: ' + ((err as Error).message || String(err)));
+      setLoginErrorMessage('追加情報の保存でエラーが発生しました: ' + ((err as Error).message || String(err)));
+      setShowLoginErrorModal(true);
     }
   };
 
@@ -868,6 +877,13 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           {authMode === 'signin' ? 'アカウントをお持ちでない方はこちら' : 'すでにアカウントをお持ちの方はこちら'}
         </button>
       </div>
+
+      <LoginErrorModal
+        isOpen={showLoginErrorModal}
+        onClose={() => setShowLoginErrorModal(false)}
+        message={loginErrorMessage}
+        onConfirm={() => setShowLoginErrorModal(false)}
+      />
     </form>
   );
 };
