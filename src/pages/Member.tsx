@@ -6,7 +6,6 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PrivacyPolicy from '../components/PrivacyPolicy';
 import IndividualAuthForm from '../components/IndividualAuthForm';
-import TrueStory from '../components/TrueStory'; // Import TrueStory component
 import { useAuth } from '../contexts/AuthContext';
 
 interface User {
@@ -49,7 +48,7 @@ const IndividualMyPage: React.FC = () => {
         .single();
 
       if (memberError || !member) {
-        console.log('Individual member not found for auth_user_id:', authUserId);
+        console.log('auth_user_id に対応する個人会員が見つかりませんでした:', authUserId);
         setVoteHistory([]);
         return;
       }
@@ -71,13 +70,13 @@ const IndividualMyPage: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching vote history:', error);
+        console.error('投票履歴の取得中にエラーが発生しました:', error);
         return;
       }
 
       setVoteHistory(votes || []);
     } catch (error) {
-      console.error('Error in fetchVoteHistory:', error);
+      console.error('fetchVoteHistory でエラーが発生しました:', error);
     } finally {
       setIsLoadingVotes(false);
     }
@@ -122,120 +121,108 @@ const IndividualMyPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    console.log('Member.tsx useEffect triggered. authLoading:', authLoading, 'session:', session, 'userId from params:', userId);
+  const [hasCheckedStatus, setHasCheckedStatus] = useState(false); // 新しい状態変数
 
+  useEffect(() => {
     if (authLoading) {
-      console.log('AuthContext is still loading. Returning.');
+      console.log('AuthContext はまだロード中です。処理を中断します。');
       return; // AuthContextの初期ロード中は待機
     }
 
-    // ここで isLoading を false に設定する条件を追加
-    if (session?.user && userId) { // session があり、かつ userId が URL に含まれている場合
-      setIsLoading(false);
-      setShowMinimalLoader(false);
-    }
+    // セッションがロードされ、かつまだステータスチェックが完了していない場合のみ実行
+    if (!hasCheckedStatus) {
+      let loadingTimeout: NodeJS.Timeout;
+      let minimalLoaderTimeout: NodeJS.Timeout;
 
-    let loadingTimeout: NodeJS.Timeout;
-    let minimalLoaderTimeout: NodeJS.Timeout;
-    let hasCompletedCheck = false;
-
-    minimalLoaderTimeout = setTimeout(() => {
-      if (!hasCompletedCheck) {
+      minimalLoaderTimeout = setTimeout(() => {
         setShowMinimalLoader(true);
-      }
-    }, 500);
+      }, 500);
 
-    const checkUserStatus = async () => {
-      console.log('checkUserStatus started. Current session:', session, 'userId:', userId);
-      try {
-        loadingTimeout = setTimeout(() => {
-          if (!hasCompletedCheck) {
-            console.log('Loading timeout - forcing login form or redirect.');
+      const checkUserStatus = async () => {
+        try {
+          loadingTimeout = setTimeout(() => {
+            console.log('Loading timeout - ログインフォームまたはリダイレクトを強制的に実行します。');
             setIsLoading(false);
             setShowMinimalLoader(false);
             setUser(null); // Ensure login form is shown if timeout occurs and not logged in
-          }
-        }, 3000); // 3秒でタイムアウト
+            setHasCheckedStatus(true); // タイムアウト時もチェック完了とする
+          }, 3000); // 3秒でタイムアウト
 
-        if (!session?.user) {
-          console.log('checkUserStatus: No session user found. Showing login form.');
-          setUser(null); // ユーザー情報をクリア
-          setIsLoading(false);
-          setShowMinimalLoader(false);
-        } else {
-          const currentUser = session.user;
-          console.log('checkUserStatus: Session user found.', currentUser.id);
-
-          // URLの userId が存在しない、または現在のユーザーIDと一致しない場合
-          if (!userId || userId !== currentUser.id) {
-            console.log('checkUserStatus: URL userId missing or mismatch. Redirecting to own page.', { currentUserId: currentUser.id, urlUserId: userId });
-            setIsLoading(false); // 追加
-            setShowMinimalLoader(false); // 追加
-            navigate(`/users/member/${currentUser.id}`);
-            return; // リダイレクト後にこのuseEffectの実行を停止
-          }
-          
-          console.log('checkUserStatus: URL userId matches session user. Fetching individual member data.');
-          // 個人会員情報をチェック
-          const { data: individualMember } = await supabase
-            .from('individual_members')
-            .select('*')
-            .eq('auth_user_id', currentUser.id)
-            .maybeSingle(); // Changed from .single() to .maybeSingle()
-
-          if (individualMember) {
-            console.log('checkUserStatus: Individual member data found.', individualMember);
-            const userName = individualMember.nickname || `${individualMember.last_name} ${individualMember.first_name}`;
-            setUser({
-              email: currentUser.email || '',
-              name: userName,
-              userType: 'individual',
-              memberData: individualMember
-            });
-            await fetchVoteHistory(currentUser.id);
-            await fetchSubmittedStory(currentUser.id);
+          if (!session?.user) {
+            console.log('checkUserStatus: セッションユーザーが見つかりません。ログインフォームを表示します。');
+            setUser(null); // ユーザー情報をクリア
+            setIsLoading(false);
+            setShowMinimalLoader(false);
           } else {
-            const isGoogleAuth = currentUser.app_metadata?.provider === 'google';
-            if (isGoogleAuth) {
-              console.log('checkUserStatus: Authenticated via Google, but not an individual member. Allowing IndividualAuthForm to render.');
-              // Do NOT set user to null here. Let the rendering logic below handle it.
+            const currentUser = session.user;
+            console.log('checkUserStatus: セッションユーザーが見つかりました。', currentUser.id);
+
+            // URLの userId が存在しない、または現在のユーザーIDと一致しない場合
+            if (!userId || userId !== currentUser.id) {
               setIsLoading(false);
               setShowMinimalLoader(false);
-              // Do not return here, allow rendering of TrueStory form
-            } else {
-              console.log('checkUserStatus: Authenticated but not an individual member (not Google Auth). Redirecting to user type selection.');
-              setIsLoading(false); // 追加
-              setShowMinimalLoader(false); // 追加
-              navigate('/users');
+              navigate(`/users/member/${currentUser.id}`);
               return; // リダイレクト後にこのuseEffectの実行を停止
             }
-          }
-        }
-        
-        hasCompletedCheck = true;
-        clearTimeout(loadingTimeout);
-        clearTimeout(minimalLoaderTimeout);
-        setIsLoading(false);
-        setShowMinimalLoader(false);
-      } catch (error) {
-        console.error('checkUserStatus: Session check error:', error);
-        hasCompletedCheck = true;
-        clearTimeout(loadingTimeout);
-        clearTimeout(minimalLoaderTimeout);
-        setIsLoading(false);
-        setShowMinimalLoader(false);
-        setUser(null); // エラー時もログインフォームを表示
-      }
-    };
 
-    checkUserStatus();
+            console.log('checkUserStatus: URLのユーザーIDがセッションのユーザーと一致しました。個々のメンバーデータを取得中です。');
+            // 個人会員情報をチェック
+            const { data: individualMember } = await supabase
+              .from('individual_members')
+              .select('*')
+              .eq('auth_user_id', currentUser.id)
+              .maybeSingle();
+
+            if (individualMember) {
+              const userName = individualMember.nickname || `${individualMember.last_name} ${individualMember.first_name}`;
+              setUser({
+                email: currentUser.email || '',
+                name: userName,
+                userType: 'individual',
+                memberData: individualMember
+              });
+              await fetchVoteHistory(currentUser.id);
+              await fetchSubmittedStory(currentUser.id);
+            setIsLoading(false); // Moved here
+            setShowMinimalLoader(false); // Moved here
+            } else {
+              const isGoogleAuth = currentUser.app_metadata?.provider === 'google';
+              if (isGoogleAuth) {
+                console.log('checkUserStatus: Google認証済みですが、個人会員ではありません。IndividualAuthForm のレンダリングを許可します。');
+                // Do NOT set user to null here. Let the rendering logic below handle it.
+                setIsLoading(false);
+                setShowMinimalLoader(false);
+                // Do not return here, allow rendering of TrueStory form
+              } else {
+                console.log('checkUserStatus: 認証済みですが、個人会員ではありません (Google Auth ではない)。ユーザータイプ選択にリダイレクトします。');
+                setIsLoading(false);
+                setShowMinimalLoader(false);
+                navigate('/users');
+                return; // リダイレクト後にこのuseEffectの実行を停止
+              }
+            }
+          }
+          clearTimeout(loadingTimeout);
+          clearTimeout(minimalLoaderTimeout);
+          setHasCheckedStatus(true); // チェック完了
+        } catch (error) {
+          console.error('checkUserStatus: Session check error:', error);
+          clearTimeout(loadingTimeout);
+          clearTimeout(minimalLoaderTimeout);
+          setIsLoading(false);
+          setShowMinimalLoader(false);
+          setUser(null); // エラー時もログインフォームを表示
+          setHasCheckedStatus(true); // エラー時もチェック完了
+        }
+      };
+
+      checkUserStatus();
+    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        console.log('IndividualMyPage - Auth state change listener:', event, 'currentSession:', currentSession);
         if (event === 'SIGNED_OUT') {
-          console.log('Auth state change: SIGNED_OUT.');
+          console.log('Auth state change: サインアウト済みです。');
           if (isSigningOut.current) {
             isSigningOut.current = false;
             return;
@@ -243,33 +230,33 @@ const IndividualMyPage: React.FC = () => {
           setUser(null);
           setIsLoading(false);
           setShowMinimalLoader(false);
+          setHasCheckedStatus(false); // サインアウト時は再度チェックが必要になるためリセット
         } else if (event === 'SIGNED_IN' && currentSession?.user) {
-          console.log('Auth state change: SIGNED_IN.', currentSession.user.id);
+          console.log('Auth state change: サインイン済みです。', currentSession.user.id);
           // 通常のログイン時は自分のページにリダイレクト
           navigate(`/users/member/${currentSession.user.id}`);
+          setHasCheckedStatus(false); // サインイン時は再度チェックが必要になるためリセット
         }
       }
     );
 
     return () => {
-      clearTimeout(loadingTimeout);
-      clearTimeout(minimalLoaderTimeout);
       subscription.unsubscribe();
     };
-  }, [navigate, session, authLoading, userId]);
+  }, [navigate, session, authLoading, userId, hasCheckedStatus]);
 
   const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
   const handleSignOut = async () => {
-    console.log('handleSignOut called.');
+    console.log('handleSignOut が呼び出されました。');
     isSigningOut.current = true;
     await robustSignOut();
     navigate('/'); // サインアウト後はトップページへ
   };
 
   const handleAuthSuccess = async (authUserId?: string) => {
-    console.log('IndividualMyPage - handleAuthSuccess called. authUserId:', authUserId);
+    console.log('IndividualMyPage - handleAuthSuccess が呼び出されました。 authUserId:', authUserId);
     const pendingSubmission = localStorage.getItem('pendingStorySubmission');
     if (pendingSubmission) {
       if (authUserId) {
@@ -285,16 +272,16 @@ const IndividualMyPage: React.FC = () => {
     }
 
     if (authUserId) {
-      console.log('handleAuthSuccess: Navigating to user ID page.', authUserId);
+      console.log('handleAuthSuccess: ユーザーIDページに遷移します。', authUserId);
       navigate(`/users/member/${authUserId}`);
     } else {
-      console.log('handleAuthSuccess: authUserId is missing. Re-checking session.');
+      console.log('handleAuthSuccess: authUserId が見つかりません。セッションを再確認します。');
       const { data: { session: newSession } } = await supabase.auth.getSession();
       if (newSession?.user) {
-        console.log('handleAuthSuccess: New session found. Navigating to user ID page.', newSession.user.id);
+        console.log('handleAuthSuccess: 新しいセッションが見つかりました。ユーザーIDページに遷移します。', newSession.user.id);
         navigate(`/users/member/${newSession.user.id}`);
       } else {
-        console.log('handleAuthSuccess: No session found after auth success. Showing login form.');
+        console.log('handleAuthSuccess: セッションが見つかりませんでした。ログインフォームを表示します。');
         setUser(null);
         setIsLoading(false);
         setShowMinimalLoader(false);
@@ -304,7 +291,7 @@ const IndividualMyPage: React.FC = () => {
 
   // ローディング状態の表示
   if (isLoading || authLoading) { // 修正
-    console.log('Rendering: Loading state.', { isLoading, authLoading, sessionExists: !!session?.user, userExists: !!user });
+    console.log('Rendering: 読み込み状態です。', { isLoading, authLoading, sessionExists: !!session?.user, userExists: !!user });
     return (
       <div className="min-h-screen bg-neutral-900 text-white relative">
         <Header />
@@ -333,7 +320,7 @@ const IndividualMyPage: React.FC = () => {
 
   // 未ログインの場合、ログインフォームを表示
   if (!session?.user) {
-    console.log('Rendering: Not logged in. Showing login form.');
+    console.log('Rendering: ログインしていません。ログインフォームを表示します。');
     return (
       <div className="min-h-screen bg-neutral-900 text-white">
         <Header />
@@ -369,7 +356,7 @@ const IndividualMyPage: React.FC = () => {
 
   // Google Authで認証済みだが、個人会員情報が未登録の場合、追加情報フォームを表示
   if (session?.user && !user && session.user.app_metadata?.provider === 'google') {
-    console.log('Rendering: Google Auth user, no individual member data. Showing additional info form.');
+    console.log('Rendering: Google認証ユーザー、個々のメンバーデータがありません。追加情報フォームを表示中です。');
     return (
       <div className="min-h-screen bg-neutral-900 text-white">
         <Header />
@@ -387,7 +374,7 @@ const IndividualMyPage: React.FC = () => {
   }
 
   // ログイン済みでユーザー情報がロードされている場合、マイページコンテンツを表示
-  console.log('Rendering: User data loaded. Showing member content.', user);
+  
   return (
     <div className="min-h-screen bg-neutral-900 text-white">
       <Header />
@@ -403,8 +390,8 @@ const IndividualMyPage: React.FC = () => {
               <p className="text-lg mb-2">ようこそ、{user.name}さん
                 <span className="ml-2 px-2 py-1 bg-blue-600 text-xs rounded">個人</span>
               </p>
-              <p className="text-neutral-400">{user.email}</p>
               <p className="text-sm my-4">マイページは順次アップデート予定です。</p>
+              <p className="text-neutral-400">メンバーシップID: <span className="text-lg font-bold text-indigo-400 tracking-wide">{user.memberData.member_id}</span></p>
             </div>
 
             <div className="max-w-2xl mx-auto">
