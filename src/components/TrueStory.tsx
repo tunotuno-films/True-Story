@@ -10,7 +10,7 @@ import StoryForm from './StoryForm';
 import SubmissionSuccess from './SubmissionSuccess';
 import ConfirmationModal from './ConfirmationModal';
 import LoginRedirectModal from './LoginRedirectModal';
-import WelcomeBackModal from './WelcomeBackModal'; // 1. Import WelcomeBackModal
+import WelcomeBackModal from './WelcomeBackModal';
 
 interface TrueStoryProps {}
 
@@ -27,7 +27,7 @@ const TrueStory: React.FC<TrueStoryProps> = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [storyForModal, setStoryForModal] = useState('');
   const [showLoginRedirectModal, setShowLoginRedirectModal] = useState(false);
-  const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false); // 2. Add state for new modal
+  const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
 
   const localStorageKey = 'trueStoryDraft';
 
@@ -63,7 +63,7 @@ https://www.truestory.jp/
   useEffect(() => {
     const shouldShowWelcomeBack = localStorage.getItem('showWelcomeBackModalAfterLogin') === 'true';
     if (shouldShowWelcomeBack && session) {
-      console.log("TrueStory.tsx: Showing WelcomeBackModal.");
+      console.log("TrueStory.tsx: WelcomeBackModalを表示中。");
       setShowWelcomeBackModal(true);
       localStorage.removeItem('showWelcomeBackModalAfterLogin');
     }
@@ -163,7 +163,7 @@ https://www.truestory.jp/
     if (!session) {
       localStorage.setItem('pendingStorySubmission', 'true');
       localStorage.setItem('showConfirmModalAfterLogin', 'true');
-      localStorage.setItem('showWelcomeBackModalAfterLogin', 'true'); // 3. Set flag
+      localStorage.setItem('showWelcomeBackModalAfterLogin', 'true');
       if (hasAgreed) {
         localStorage.setItem('storyFormAgreed', 'true');
       }

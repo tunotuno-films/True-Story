@@ -94,18 +94,18 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('IndividualAuthForm - Auth state change:', event, session?.user?.id);
+        console.log('IndividualAuthForm - 認証状態の変更:', event, session?.user?.id);
         
         if (event === 'SIGNED_IN' && session?.user) {
           const user = session.user;
           const isGoogleAuth = user.app_metadata?.provider === 'google';
           
           if (isGoogleAuth) {
-            console.log('IndividualAuthForm - Google auth detected for user:', user.id);
+            console.log('IndividualAuthForm - Google認証が検出されました。', user.id);
             setIsCheckingMember(true);
             
             const timeout = setTimeout(async () => {
-              console.log('Member check timeout - logging out user');
+              console.log('Member check timeout - ユーザーをログアウトします。');
               try {
                 await supabase.auth.signOut();
                 setIsCheckingMember(false);
@@ -120,11 +120,11 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             try {
               const existingMember = await checkMemberExists(user.id);
               clearTimeout(timeout);
-              
-              console.log('IndividualAuthForm - Member check result:', existingMember);
-              
+
+              console.log('IndividualAuthForm - メンバー確認結果:', existingMember);
+
               if (!existingMember) {
-                console.log('IndividualAuthForm - No existing member found, showing additional info form');
+                console.log('IndividualAuthForm - 既存のメンバーが見つかりませんでした。追加情報フォームを表示します。');
                 setGoogleUser(user);
                 setFormData(prev => ({
                   ...prev,
@@ -134,13 +134,13 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
                 setShowAdditionalInfo(true);
                 setIsCheckingMember(false);
               } else if (existingMember.user_type === 'individual') {
-                console.log('IndividualAuthForm - Existing individual member found, proceeding with login');
+                console.log('IndividualAuthForm - 既存の個人メンバーが見つかりました。ログインを続行します。');
                 const userName = existingMember.nickname || `${existingMember.last_name} ${existingMember.first_name}`;
                 setIsCheckingMember(false);
                 onAuthSuccess(user.email || '', userName, user.id);
               } else {
                 // Google認証でログインしたが、個人会員ではない場合
-                console.log('IndividualAuthForm - Google auth user is not an individual member, redirecting to /users');
+                console.log('IndividualAuthForm - Google認証ユーザーは個人会員ではありません。/usersにリダイレクトします。');
                 await robustSignOut(); // ログアウトしてユーザータイプ選択に戻す
                 navigate('/users');
               }
@@ -179,7 +179,7 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             window.location.hash.includes('error') ||
             window.location.hash.includes('provider_token'))
         ) {
-          console.log('IndividualAuthForm - processing auth callback from URL hash');
+          console.log('IndividualAuthForm - URLハッシュからの認証コールバック処理中...');
           try {
             const { error } = await supabase.auth.getSession();
             if (error) {
@@ -204,13 +204,13 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
         const isGoogleAuth = user.app_metadata?.provider === 'google';
         
         if (isGoogleAuth) {
-          console.log('IndividualAuthForm - Existing Google session found:', user.id);
+          console.log('IndividualAuthForm - 既存のGoogleセッションが見つかりました:', user.id);
           setIsCheckingMember(true);
           
           const existingMember = await checkMemberExists(user.id);
           
           if (!existingMember) {
-            console.log('IndividualAuthForm - No member record for existing Google session');
+            console.log('IndividualAuthForm - 既存のGoogleセッションにメンバー記録が見つかりませんでした。追加情報フォームを表示します。');
             setGoogleUser(user);
             setFormData(prev => ({
               ...prev,
@@ -219,11 +219,13 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             }));
             setShowAdditionalInfo(true);
           } else if (existingMember.user_type === 'individual') {
-            console.log('IndividualAuthForm - Existing individual member for current session');
+            console.log('IndividualAuthForm - 既存の個人メンバーが見つかりました。ログインを続行します。');
             const userName = existingMember.nickname || `${existingMember.last_name} ${existingMember.first_name}`;
             onAuthSuccess(user.email || '', userName, user.id);
+            setIsCheckingMember(false); // Ensure loading state is cleared
+            return; // Important: Exit after calling onAuthSuccess
           } else {
-            console.log('IndividualAuthForm - Existing Google auth user is not an individual member, redirecting to /users');
+            console.log('IndividualAuthForm - Google認証ユーザーは個人会員ではありません。/usersにリダイレクトします。');
             await robustSignOut();
             navigate('/users');
           }

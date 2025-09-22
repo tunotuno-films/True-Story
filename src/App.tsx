@@ -134,7 +134,7 @@ function App() {
     <AuthProvider>
       <Router>
         <AppRoutes />
-        <Analytics />
+        <Analytics debug={false} />
       </Router>
     </AuthProvider>
   );

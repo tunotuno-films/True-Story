@@ -170,7 +170,7 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
 
             if (insertError) {
               if (insertError.code === '42501' && insertAttempts < maxAttempts) {
-                console.log(`Insert attempt ${insertAttempts} failed, retrying...`);
+                console.log(`登録試行 ${insertAttempts} が失敗しました。再試行します...`);
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 return attemptInsert();
               } else {
@@ -178,7 +178,7 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
               }
             }
 
-            console.log('Successfully inserted sponsor member:', insertData);
+            console.log('スポンサーメンバーの登録が完了しました:', insertData);
 
             const userName = `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
             onAuthSuccess(formData.email, userName, user.id);

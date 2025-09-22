@@ -42,7 +42,7 @@ const SponsorPage: React.FC = () => {
 
           // URLにIDがあり、セッションユーザーのIDと一致しない場合はリダイレクト
           if (urlId && currentUser.id !== urlId) {
-            console.log('URL ID does not match session user ID. Redirecting.');
+            console.log('URL IDがセッションユーザーのIDと一致しません。リダイレクトします。');
             navigate('/users');
             return;
           }

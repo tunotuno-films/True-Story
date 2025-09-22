@@ -18,7 +18,7 @@ const MyPage: React.FC = () => {
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
 
   const handleSignOut = async () => {
-    console.log('handleSignOut called from User.tsx.');
+    console.log('handleSignOutがUser.tsxから呼び出されました。');
     await robustSignOut();
     navigate('/'); // サインアウト後はトップページへ
   };
@@ -26,10 +26,9 @@ const MyPage: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       setIsLoading(true);
-      console.log('User.tsx: handleAuthCallback triggered. authLoading:', authLoading, 'session:', session);
 
       if (authLoading) {
-        console.log('User.tsx: AuthContext still loading. Waiting...');
+        console.log('User.tsx: AuthContextがまだ読み込まれています。待機中...');
         return; // AuthContextがロードされるまで待機
       }
 
@@ -42,7 +41,7 @@ const MyPage: React.FC = () => {
             window.location.hash.includes('error') ||
             window.location.hash.includes('provider_token'))
         ) {
-          console.log('User.tsx: Processing auth callback from URL hash.');
+          console.log('User.tsx: URLハッシュから認証コールバックを処理中です。');
           // Supabase-js v2 does not expose getSessionFromUrl; use getSession to obtain the current session instead
           await supabase.auth.getSession(); // これによりセッションが処理される
           // URLのハッシュを消してクリーンにする
@@ -69,7 +68,7 @@ const MyPage: React.FC = () => {
       }
 
       if (session?.user) {
-        console.log('User.tsx: Session user found.', session.user.id);
+        console.log('User.tsx: セッションユーザーが見つかりました。', session.user.id);
         const currentUser = session.user;
 
         // 個人会員情報をチェック
@@ -81,7 +80,7 @@ const MyPage: React.FC = () => {
           .maybeSingle();
 
         if (individualMember) {
-          console.log('User.tsx: Individual member found. Redirecting to /users/member/', individualMember.auth_user_id);
+          console.log('User.tsx: 個人会員が見つかりました。/users/member/にリダイレクトします。', individualMember.auth_user_id);
           navigate(`/users/member/${individualMember.auth_user_id}`);
           return;
         }
@@ -95,22 +94,22 @@ const MyPage: React.FC = () => {
           .maybeSingle();
 
         if (sponsorMember) {
-          console.log('User.tsx: Sponsor member found. Redirecting to /users/sponsor/', currentUser.id);
+          console.log('User.tsx: スポンサー会員が見つかりました。/users/sponsor/にリダイレクトします。', currentUser.id);
           navigate(`/users/sponsor/${currentUser.id}`);
           return;
         }
 
         // 新規登録ユーザーの場合、会員情報入力フォームへリダイレクト
         if (!individualMember && !sponsorMember) {
-          console.log('User.tsx: New user detected. Redirecting to member registration form.');
+          console.log('User.tsx: 新規ユーザーが検出されました。会員登録フォームにリダイレクトします。');
           navigate(`/users/member/${currentUser.id}`); // ここを修正
           return;
         }
 
-        console.log('User.tsx: Session user found, but no member type. Displaying type selection.');
+        console.log('User.tsx: セッションユーザーが見つかりましたが、会員タイプがありません。タイプ選択を表示します。');
         setIsLoading(false);
       } else {
-        console.log('User.tsx: No session user found. Displaying type selection.');
+        console.log('User.tsx: セッションユーザーが見つかりませんでした。タイプ選択を表示します。');
         setIsLoading(false);
       }
     };
@@ -120,7 +119,6 @@ const MyPage: React.FC = () => {
     // 認証状態の変更を監視（ログイン/ログアウト時）
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        console.log('User.tsx: Auth state change listener:', event, 'currentSession:', currentSession);
         if (event === 'SIGNED_IN' && currentSession?.user) {
           // ログインイベント発生時、再度ハンドラを実行してリダイレクト
           handleAuthCallback();
