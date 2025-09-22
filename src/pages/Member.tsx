@@ -183,16 +183,15 @@ const IndividualMyPage: React.FC = () => {
               });
               await fetchVoteHistory(currentUser.id);
               await fetchSubmittedStory(currentUser.id);
-            setIsLoading(false); // Moved here
-            setShowMinimalLoader(false); // Moved here
+              setIsLoading(false); // Moved here
+              setShowMinimalLoader(false); // Moved here
             } else {
               const isGoogleAuth = currentUser.app_metadata?.provider === 'google';
               if (isGoogleAuth) {
                 console.log('checkUserStatus: Google認証済みですが、個人会員ではありません。IndividualAuthForm のレンダリングを許可します。');
-                // Do NOT set user to null here. Let the rendering logic below handle it.
+                setUser(null); // This is crucial to make the rendering condition work
                 setIsLoading(false);
                 setShowMinimalLoader(false);
-                // Do not return here, allow rendering of TrueStory form
               } else {
                 console.log('checkUserStatus: 認証済みですが、個人会員ではありません (Google Auth ではない)。ユーザータイプ選択にリダイレクトします。');
                 setIsLoading(false);
@@ -235,7 +234,6 @@ const IndividualMyPage: React.FC = () => {
           console.log('Auth state change: サインイン済みです。', currentSession.user.id);
           // 通常のログイン時は自分のページにリダイレクト
           navigate(`/users/member/${currentSession.user.id}`);
-          setHasCheckedStatus(false); // サインイン時は再度チェックが必要になるためリセット
         }
       }
     );
@@ -255,13 +253,25 @@ const IndividualMyPage: React.FC = () => {
     navigate('/'); // サインアウト後はトップページへ
   };
 
-  const handleAuthSuccess = async (authUserId?: string) => {
+  const handleAuthSuccess = async (email: string, name?: string, authUserId?: string) => {
     console.log('IndividualMyPage - handleAuthSuccess が呼び出されました。 authUserId:', authUserId);
     const pendingSubmission = localStorage.getItem('pendingStorySubmission');
     if (pendingSubmission) {
       if (authUserId) {
         const existingMember = await checkMemberExists(authUserId);
         if (existingMember && existingMember.user_type === 'individual') { // user_type を確認
+          const currentUser = (await supabase.auth.getSession()).data.session?.user;
+          if (currentUser) {
+            const { data: memberData } = await supabase.from('individual_members').select('*').eq('auth_user_id', currentUser.id).maybeSingle();
+            if (memberData) {
+              setUser({
+                email: email,
+                name: name,
+                userType: 'individual',
+                memberData: memberData
+              });
+            }
+          }
           localStorage.removeItem('pendingStorySubmission');
           navigate('/#truestoryform');
           return;
@@ -272,12 +282,33 @@ const IndividualMyPage: React.FC = () => {
     }
 
     if (authUserId) {
+      const currentUser = (await supabase.auth.getSession()).data.session?.user;
+      if (currentUser) {
+        const { data: memberData } = await supabase.from('individual_members').select('*').eq('auth_user_id', currentUser.id).maybeSingle();
+        if (memberData) {
+          setUser({
+            email: email,
+            name: name,
+            userType: 'individual',
+            memberData: memberData
+          });
+        }
+      }
       console.log('handleAuthSuccess: ユーザーIDページに遷移します。', authUserId);
       navigate(`/users/member/${authUserId}`);
     } else {
       console.log('handleAuthSuccess: authUserId が見つかりません。セッションを再確認します。');
       const { data: { session: newSession } } = await supabase.auth.getSession();
       if (newSession?.user) {
+        const { data: memberData } = await supabase.from('individual_members').select('*').eq('auth_user_id', newSession.user.id).maybeSingle();
+        if (memberData) {
+          setUser({
+            email: email,
+            name: name,
+            userType: 'individual',
+            memberData: memberData
+          });
+        }
         console.log('handleAuthSuccess: 新しいセッションが見つかりました。ユーザーIDページに遷移します。', newSession.user.id);
         navigate(`/users/member/${newSession.user.id}`);
       } else {

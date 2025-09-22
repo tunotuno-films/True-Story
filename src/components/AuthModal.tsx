@@ -12,15 +12,17 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (!email || !password) {
-      alert('Please enter email and password.');
+      setError('Please enter email and password.');
       return;
     }
     if (mode === 'signup' && !name) {
-      alert('Please enter your name for signup.');
+      setError('Please enter your name for signup.');
       return;
     }
     onAuthSuccess(email, mode === 'signup' ? name : undefined);
@@ -29,6 +31,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode }) => {
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">{mode === 'signin' ? 'Sign In' : 'Sign Up'}</h2>
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'signup' && (
           <div>

@@ -104,14 +104,6 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
     }
   };
 
-  const handleVoteButtonClick = () => {
-    if (userType === 'sponsor') {
-      setShowSponsorMessage(true);
-    } else {
-      setIsModalOpen(true);
-    }
-  };
-
   // Removed unused `colors` array since it wasn't referenced.
   // artistVoteData was removed because it was declared but never read.
   // If you intend to render vote summaries, recreate this structure where it's actually used.

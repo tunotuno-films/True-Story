@@ -217,9 +217,9 @@ https://www.truestory.jp/
               <div className="mt-2 flex justify-center md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 md:mt-0">
                 {/* 環境変数から読み込み。無ければ public 配下のフォールバック画像を使用し、警告を出す */}
                 {(() => {
-                  const QUO_CARD_IMAGE_URL = import.meta.env.VITE_QUO_CARD_IMAGE_URL ?? 'https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/st050011_quosmile_silver.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvc3QwNTAwMTFfcXVvc21pbGVfc2lsdmVyLmpwZyIsImlhdCI6MTc1ODUwOTM5NywiZXhwIjo0ODgwNTczMzk3fQ.vhZLZ8wklXizfh0WE24p6W9C5DE7m8RNs8MS4w5vU5c';
+                  const QUO_CARD_IMAGE_URL = import.meta.env.VITE_QUO_CARD_IMAGE_URL ?? '/img/quo-card.jpg';
                   if (!import.meta.env.VITE_QUO_CARD_IMAGE_URL) {
-                    console.warn('VITE_QUO_CARD_IMAGE_URL is not set. Using fallback image from Supabase storage.');
+                    console.warn('VITE_QUO_CARD_IMAGE_URL is not set. Using fallback image.');
                   }
                   return (
                     <img
