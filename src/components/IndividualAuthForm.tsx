@@ -17,11 +17,12 @@ import LoginErrorModal from './LoginErrorModal'; // 追加
 
 // 新しいメンバーIDを生成する関数
 const generateNewMemberId = async () => {
+  const ID_PREFIX = 'TS2025';
   // 1. 'TS2025'で始まるIDの中から、最後に登録されたものを降順で取得する
   const { data, error } = await supabase
     .from('member_ids_view')
     .select('member_id')
-    .like('member_id', 'TS2025%')
+    .like('member_id', `${ID_PREFIX}%`)
     .order('member_id', { ascending: false })
     .limit(1)
     .maybeSingle(); // テーブルが空の場合もエラーにしない
@@ -37,7 +38,7 @@ const generateNewMemberId = async () => {
   let newIdNumber = 1;
   if (data && data.member_id) {
     // IDの数字部分を抽出して、次の番号を計算
-    const lastIdNumber = parseInt(data.member_id.substring(6), 10);
+    const lastIdNumber = parseInt(data.member_id.substring(ID_PREFIX.length), 10);
     if (!isNaN(lastIdNumber)) {
       newIdNumber = lastIdNumber + 1;
     }
@@ -45,7 +46,7 @@ const generateNewMemberId = async () => {
 
   // 2. 新しいIDを生成 (TS2025 + 4桁の連番)
   const paddedId = String(newIdNumber).padStart(4, '0');
-  return `TS2025${paddedId}`;
+  return `${ID_PREFIX}${paddedId}`;
 };
 
 const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
