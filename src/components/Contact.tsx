@@ -152,12 +152,12 @@ const Contact: React.FC<ContactProps> = ({ onShowPrivacyPolicy }) => {
                                         value={formData.phone}
                                         onChange={(e) => {
                                             const value = e.target.value;
-                                            // 数字とハイフン以外の入力を防ぐ
-                                            const filteredValue = value.replace(/[^0-9-]/g, '');
+                                            // ハイフンを含め、数字以外の入力を防ぐ
+                                            const filteredValue = value.replace(/[^0-9]/g, '');
                                             setFormData({ ...formData, phone: filteredValue });
                                         }}
                                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder:text-gray-500"
-                                        placeholder="090-1234-5678"
+                                        placeholder="09012345678"
                                         disabled={isSubmitting}
                                     />
                                 </div>

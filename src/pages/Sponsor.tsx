@@ -173,7 +173,7 @@ const SponsorPage: React.FC = () => {
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold font-noto mb-6">スポンサーシップ</h1>
-              <p className="text-neutral-300">スポンサーとしてログインまたは新規登録</p>
+              <p className="text-neutral-300">ログインまたは新規登録</p>
               <div className="mt-4">
                 <Link to="/users" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
                   アカウントの種類選択に戻る
@@ -195,7 +195,7 @@ const SponsorPage: React.FC = () => {
       
       <main className="container mx-auto px-4 py-16">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold font-noto mb-8">スポンサーマイページ</h1>
+          <h1 className="text-4xl font-bold font-noto mb-8">スポンサーシップ マイページ</h1>
         </div>
           
         {user && (
@@ -206,11 +206,12 @@ const SponsorPage: React.FC = () => {
                 <span className="ml-2 px-2 py-1 bg-blue-600 text-xs rounded">企業</span>
               </p>
               <p className="text-neutral-400">{user.email}</p>
+              <p className="text-sm my-4">マイページは順次アップデート予定です。</p>
             </div>
 
             <div className="max-w-2xl mx-auto">
               <div className="bg-neutral-800 rounded-lg p-6 mb-6">
-                <h3 className="text-xl font-bold mb-4 text-blue-400">スポンサー企業情報</h3>
+                <h3 className="text-xl font-bold mb-4 text-blue-400">スポンサーシップ情報</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-neutral-400">会社名</p>
@@ -237,21 +238,6 @@ const SponsorPage: React.FC = () => {
                     <p className="font-medium">{user.memberData.company_address || '未設定'}</p>
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-neutral-800 rounded-lg p-6 mb-6">
-                <h3 className="text-xl font-bold mb-4 text-green-400">スポンサー特典</h3>
-                <ul className="space-y-2 text-neutral-300">
-                  <li>• 優先的な作品情報の配信</li>
-                  <li>• スポンサー限定イベントへの招待</li>
-                  <li>• 作品への企業名掲載（プランによる）</li>
-                  <li>• 制作進捗の定期報告</li>
-                </ul>
-              </div>
-
-              <div className="bg-neutral-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-4 text-purple-400">プロジェクト支援状況</h3>
-                <p className="text-neutral-300">支援履歴や参加プロジェクトの情報を表示</p>
               </div>
             </div>
 

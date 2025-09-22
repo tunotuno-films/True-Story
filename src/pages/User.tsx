@@ -176,13 +176,13 @@ const MyPage: React.FC = () => {
             </Link>
 
             <Link
-              to="/users/sponsor"
+              to="/users/"
               className="w-full p-4 text-left bg-neutral-700 border border-neutral-600 rounded-md hover:bg-neutral-600 transition duration-200 flex items-center gap-3"
             >
               <Building className="w-6 h-6 text-blue-500" />
               <div>
                 <h3 className="font-bold text-white">スポンサーシップ</h3>
-                <p className="text-sm text-neutral-400">企業・団体の方はこちら</p>
+                <p className="text-sm text-neutral-400">coming soon</p>
               </div>
             </Link>
           </div>
