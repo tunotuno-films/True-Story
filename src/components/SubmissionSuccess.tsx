@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface Props {
   tweetTemplate: string;
@@ -6,6 +6,14 @@ interface Props {
 }
 
 const SubmissionSuccess: React.FC<Props> = ({ tweetTemplate, onRetry }) => {
+  useEffect(() => {
+    // このコンポーネントが表示された際にXのイベントピクセルを発火させます。
+    // これにより、物語の投稿が成功した（コンバージョン）ことをトラッキングします。
+    if ((window as any).twq) {
+      (window as any).twq('event', 'tw-qaf9m-qaf9m', {});
+    }
+  }, []);
+
   const postToX = () => {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetTemplate)}`;
     window.open(url, '_blank', 'noopener,noreferrer');

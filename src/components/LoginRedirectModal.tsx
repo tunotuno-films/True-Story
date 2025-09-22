@@ -15,15 +15,22 @@ const LoginRedirectModal: React.FC<LoginRedirectModalProps> = ({
   const [countdown, setCountdown] = useState(countdownDuration);
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
+  const [isRendering, setIsRendering] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
+      setIsRendering(true);
       setIsVisible(true);
       setCountdown(countdownDuration);
     } else {
-      setIsVisible(false);
+      setIsVisible(false); // Start fade-out
+      const timer = setTimeout(() => {
+        setIsRendering(false); // Unmount after animation
+        onClose(); // Call onClose after animation
+      }, 300); // Match transition duration
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, countdownDuration]);
+  }, [isOpen, countdownDuration, onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -41,7 +48,7 @@ const LoginRedirectModal: React.FC<LoginRedirectModalProps> = ({
     return () => clearTimeout(timerId);
   }, [isOpen, countdown, navigate, onClose]);
 
-  if (!isOpen && !isVisible) return null;
+  if (!isRendering) return null;
 
   return (
     <div

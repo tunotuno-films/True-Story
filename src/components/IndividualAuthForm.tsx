@@ -15,6 +15,39 @@ import {
 import { useNavigate } from 'react-router-dom'; // 追加
 import LoginErrorModal from './LoginErrorModal'; // 追加
 
+// 新しいメンバーIDを生成する関数
+const generateNewMemberId = async () => {
+  // 1. 'TS2025'で始まるIDの中から、最後に登録されたものを降順で取得する
+  const { data, error } = await supabase
+    .from('member_ids_view')
+    .select('member_id')
+    .like('member_id', 'TS2025%')
+    .order('member_id', { ascending: false })
+    .limit(1)
+    .maybeSingle(); // テーブルが空の場合もエラーにしない
+
+  if (error) {
+    console.error('Error fetching latest member_id:', error);
+    // エラーの場合はフォールバックとしてランダムなIDを生成
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    return `TS_ERR${timestamp}${random}`;
+  }
+
+  let newIdNumber = 1;
+  if (data && data.member_id) {
+    // IDの数字部分を抽出して、次の番号を計算
+    const lastIdNumber = parseInt(data.member_id.substring(6), 10);
+    if (!isNaN(lastIdNumber)) {
+      newIdNumber = lastIdNumber + 1;
+    }
+  }
+
+  // 2. 新しいIDを生成 (TS2025 + 4桁の連番)
+  const paddedId = String(newIdNumber).padStart(4, '0');
+  return `TS2025${paddedId}`;
+};
+
 const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
@@ -331,31 +364,45 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           return;
         }
 
-        const timestamp = Date.now();
-        const random = Math.floor(Math.random() * 1000);
-        const memberId = `IND${timestamp}${random}`;
+        // Start retry loop for member insertion
+        const maxAttempts = 5;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            const memberId = await generateNewMemberId();
 
-        const { error: insertError } = await supabase.from('individual_members').insert({
-          member_id: memberId,
-          auth_user_id: user.id,
-          last_name: formData.lastName,
-          first_name: formData.firstName,
-          birth_date: formatBirthDate(formData.birthYear, formData.birthMonth, formData.birthDay),
-          gender: formData.gender,
-          email: formData.email,
-          phone_number: formData.phoneNumber,
-          nickname: formData.nickname,
-        });
+            const { error: insertError } = await supabase.from('individual_members').insert({
+              member_id: memberId,
+              auth_user_id: user.id,
+              last_name: formData.lastName,
+              first_name: formData.firstName,
+              birth_date: formatBirthDate(formData.birthYear, formData.birthMonth, formData.birthDay),
+              gender: formData.gender,
+              email: formData.email,
+              phone_number: formData.phoneNumber,
+              nickname: formData.nickname,
+            });
 
-        if (insertError) {
-          console.error('Insert error details:', insertError);
-          throw insertError;
+            if (insertError) {
+              if (insertError.code === '23505' && attempt < maxAttempts) {
+                console.warn(`Attempt ${attempt}: Duplicate member_id ${memberId}. Retrying...`);
+                await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100));
+                continue; // Go to next attempt
+              }
+              throw insertError;
+            }
+
+            // --- SUCCESS ---
+            const userName = formData.nickname || `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
+            onAuthSuccess(formData.email, userName, user.id);
+            return; // Exit function on success
+
+          } catch (err) {
+            console.error(`Attempt ${attempt} failed during signup:`, err);
+            if (attempt >= maxAttempts) {
+              throw err; // Rethrow the last error to be caught by the outer catch block
+            }
+          }
         }
-
-        const userName = formData.nickname || `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
-        onAuthSuccess(formData.email, userName, user.id);
-
-        return;
       }
     } catch (err) {
       console.error('Authentication error:', err);
@@ -367,51 +414,61 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   const handleAdditionalInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      if (!googleUser && !authenticatedUser) {
-        throw new Error('認証されたユーザー情報が見つかりません。');
+    const maxAttempts = 5;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        if (!googleUser && !authenticatedUser) {
+          throw new Error('認証されたユーザー情報が見つかりません。');
+        }
+        const targetUser = googleUser || authenticatedUser;
+
+        const birthDate = formatBirthDate(formData.birthYear, formData.birthMonth, formData.birthDay);
+        const memberId = await generateNewMemberId();
+
+        const { error: insertError } = await supabase.from('individual_members').insert({
+          member_id: memberId,
+          auth_user_id: targetUser.id,
+          last_name: formData.lastName,
+          first_name: formData.firstName,
+          birth_date: birthDate,
+          gender: formData.gender,
+          email: targetUser.email,
+          phone_number: formData.phoneNumber,
+          nickname: formData.nickname,
+        });
+
+        if (insertError) {
+          if (insertError.code === '23505' && attempt < maxAttempts) {
+            console.warn(`Attempt ${attempt}: Duplicate member_id ${memberId}. Retrying...`);
+            await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100));
+            continue; // Go to next attempt
+          }
+          throw insertError;
+        }
+
+        // --- SUCCESS ---
+        const userName = formData.nickname || `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
+        setShowAdditionalInfo(false);
+        setGoogleUser(null);
+        setAuthenticatedUser(null);
+
+        const pendingSubmission = localStorage.getItem('pendingStorySubmission');
+        if (pendingSubmission) {
+          localStorage.removeItem('pendingStorySubmission');
+          navigate('/#truestoryform');
+        } else {
+          onAuthSuccess(targetUser.email, userName, targetUser.id);
+        }
+        return; // Exit function on success
+
+      } catch (err) {
+        console.error(`Attempt ${attempt} failed:`, err);
+        if (attempt >= maxAttempts) {
+          // If all attempts fail, show a final error
+          setLoginErrorMessage('メンバーの登録に失敗しました。時間をおいて再度お試しください。');
+          setShowLoginErrorModal(true);
+        }
       }
-
-      const targetUser = googleUser || authenticatedUser;
-
-      const birthDate = formatBirthDate(formData.birthYear, formData.birthMonth, formData.birthDay);
-      const timestamp = Date.now();
-      const random = Math.floor(Math.random() * 1000);
-      const memberId = `IND${timestamp}${random}`;
-
-      const { error: insertError } = await supabase.from('individual_members').insert({
-        member_id: memberId,
-        auth_user_id: targetUser.id,
-        last_name: formData.lastName,
-        first_name: formData.firstName,
-        birth_date: birthDate,
-        gender: formData.gender,
-        email: targetUser.email,
-        phone_number: formData.phoneNumber,
-        nickname: formData.nickname,
-      });
-
-      if (insertError) {
-        console.error('Insert error details:', insertError);
-        throw insertError;
-      }
-
-      const userName = formData.nickname || `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
-      setShowAdditionalInfo(false);
-      setGoogleUser(null);
-      setAuthenticatedUser(null);
-
-      const pendingSubmission = localStorage.getItem('pendingStorySubmission');
-      if (pendingSubmission) {
-        localStorage.removeItem('pendingStorySubmission');
-        navigate('/#truestoryform');
-      } else {
-        onAuthSuccess(targetUser.email, userName, targetUser.id);
-      }
-    } catch (err) {
-      console.error('Additional info submission error:', err);
-      setLoginErrorMessage('追加情報の保存でエラーが発生しました: ' + ((err as Error).message || String(err)));
-      setShowLoginErrorModal(true);
     }
   };
 

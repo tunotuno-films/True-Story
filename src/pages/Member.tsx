@@ -23,11 +23,13 @@ const IndividualMyPage: React.FC = () => {
   const [showMinimalLoader, setShowMinimalLoader] = useState(false);
   const [voteHistory, setVoteHistory] = useState<any[]>([]);
   const [isLoadingVotes, setIsLoadingVotes] = useState(false);
+  const [submittedStory, setSubmittedStory] = useState<{ content: string; submitted_at: string; } | null>(null);
+  const [isLoadingStory, setIsLoadingStory] = useState(false);
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
   const isSigningOut = useRef(false);
   const { session, loading: authLoading } = useAuth();
-  const [subtitle, setSubtitle] = useState('メンバーとしてログインまたは新規登録');
+  const [subtitle, setSubtitle] = useState('ログインまたは新規登録');
 
   useEffect(() => {
     const pendingSubmission = localStorage.getItem('pendingStorySubmission');
@@ -78,6 +80,45 @@ const IndividualMyPage: React.FC = () => {
       console.error('Error in fetchVoteHistory:', error);
     } finally {
       setIsLoadingVotes(false);
+    }
+  };
+
+  const fetchSubmittedStory = async (authUserId: string) => {
+    setIsLoadingStory(true);
+    try {
+      const { data: storyData, error: storyError } = await supabase
+        .from('stories')
+        .select('file_path, created_at')
+        .eq('user_id', authUserId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (storyError || !storyData) {
+        if (storyError && storyError.code !== 'PGRST116') { // 'PGRST116' means no rows found
+          console.error('Error fetching story metadata:', storyError);
+        }
+        setSubmittedStory(null);
+        return;
+      }
+
+      const { data: blobData, error: downloadError } = await supabase.storage
+        .from('stories')
+        .download(storyData.file_path);
+
+      if (downloadError) {
+        console.error('Error downloading story content:', downloadError);
+        setSubmittedStory(null);
+        return;
+      }
+
+      const storyContent = await blobData.text();
+      setSubmittedStory({ content: storyContent, submitted_at: storyData.created_at });
+
+    } catch (error) {
+      console.error('Error in fetchSubmittedStory:', error);
+    } finally {
+      setIsLoadingStory(false);
     }
   };
 
@@ -153,6 +194,7 @@ const IndividualMyPage: React.FC = () => {
               memberData: individualMember
             });
             await fetchVoteHistory(currentUser.id);
+            await fetchSubmittedStory(currentUser.id);
           } else {
             const isGoogleAuth = currentUser.app_metadata?.provider === 'google';
             if (isGoogleAuth) {
@@ -305,6 +347,16 @@ const IndividualMyPage: React.FC = () => {
                   アカウントの種類選択に戻る
                 </Link>
               </div>
+              <div className="mt-8 text-left text-neutral-300 border-t border-neutral-700 pt-6">
+                  <h3 className="text-lg font-semibold text-white mb-4 text-center">特典</h3>
+                  <ul className="space-y-2 list-disc list-inside text-sm text-neutral-400 pb-6 border-b border-neutral-700">
+                    <li>最新情報や進捗情報の通知</li>
+                    <li>過去の投稿や投票のログ表示</li>
+                    <li>メンバーシップのみの限定情報やコンテンツ</li>
+                    <li>出演者やアーティストからの特別メッセージ</li>
+                    <li>メールマガジンの配信 (仮)</li>
+                  </ul>
+                </div>
             </div>
             <IndividualAuthForm onAuthSuccess={handleAuthSuccess} />
           </div>
@@ -342,20 +394,23 @@ const IndividualMyPage: React.FC = () => {
       
       <main className="container mx-auto px-4 py-16">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold font-noto mb-8">マイページ</h1>
+          <h1 className="text-4xl font-bold font-noto mb-8">メンバーシップ マイページ</h1>
         </div>
           
         {user && (
           <div>
             <div className="text-center mb-8">
-              <p className="text-lg mb-2">ようこそ、{user.name}さん</p>
+              <p className="text-lg mb-2">ようこそ、{user.name}さん
+                <span className="ml-2 px-2 py-1 bg-blue-600 text-xs rounded">個人</span>
+              </p>
               <p className="text-neutral-400">{user.email}</p>
+              <p className="text-sm my-4">マイページは順次アップデート予定です。</p>
             </div>
 
-            <div className="max-w-md mx-auto">
+            <div className="max-w-2xl mx-auto">
               <div className="bg-neutral-800 rounded-lg p-6 mb-6">
                 <h3 className="text-xl font-bold mb-4 text-green-400">メンバーシップ情報</h3>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-neutral-400">お名前</p>
                     <p className="font-medium">{user.memberData.last_name} {user.memberData.first_name}</p>
@@ -365,14 +420,50 @@ const IndividualMyPage: React.FC = () => {
                     <p className="font-medium">{user.memberData.nickname}</p>
                   </div>
                   <div>
+                    <p className="text-sm text-neutral-400">メールアドレス</p>
+                    <p className="font-medium">{user.email}</p>
+                  </div>
+                  <div>
                     <p className="text-sm text-neutral-400">電話番号</p>
                     <p className="font-medium">{user.memberData.phone_number}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-neutral-400">生年月日</p>
+                    <p className="font-medium">{user.memberData.birth_date ? new Date(user.memberData.birth_date).toLocaleDateString('ja-JP') : '未設定'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-neutral-400">性別</p>
+                    <p className="font-medium">{user.memberData.gender || '未設定'}</p>
                   </div>
                 </div>
               </div>
 
+              <div className="bg-neutral-800 rounded-lg p-6 mb-6">
+                <h3 className="text-xl font-bold mb-4 text-purple-400">あなたが投稿した実話</h3>
+                {isLoadingStory ? (
+                  <div className="text-center py-4">
+                    <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-sm text-neutral-400">読み込み中...</p>
+                  </div>
+                ) : submittedStory ? (
+                  <div>
+                    <p className="text-xs text-neutral-400 mb-2">
+                      投稿日時: {new Date(submittedStory.submitted_at).toLocaleString('ja-JP')}
+                    </p>
+                    <div className="bg-neutral-900 p-4 rounded-md max-h-60 overflow-y-auto">
+                      <p className="text-neutral-200 whitespace-pre-wrap">{submittedStory.content}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-neutral-400 mb-2">まだ実話が投稿されていません</p>
+                    <p className="text-sm text-neutral-500">トップページからあなたの物語を投稿してみましょう！</p>
+                  </div>
+                )}
+              </div>
+
               <div className="bg-neutral-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-4 text-blue-400">投票状況</h3>
+                <h3 className="text-xl font-bold mb-4 text-blue-400">アーティストの投票履歴</h3>
                 
                 {isLoadingVotes ? (
                   <div className="text-center py-4">
@@ -422,8 +513,9 @@ const IndividualMyPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-neutral-400 mb-2">まだ投票していません</p>
-                    <p className="text-sm text-neutral-500">アーティストページから投票してみましょう！</p>
+                    <p className="text-neutral-400 mb-2">coming soon</p>
+                    {/* <p className="text-neutral-400 mb-2">まだ投票していません</p>
+                    <p className="text-sm text-neutral-500">アーティストページから投票してみましょう！</p> */}
                   </div>
                 )}
               </div>
@@ -449,3 +541,6 @@ const IndividualMyPage: React.FC = () => {
 };
 
 export { IndividualMyPage };
+
+
+export default IndividualMyPage;

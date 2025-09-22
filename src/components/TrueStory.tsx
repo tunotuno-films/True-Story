@@ -232,7 +232,7 @@ https://www.truestory.jp/
               </div>
             </div>
             <p className="text-center text-neutral-300 text-base mb-4">
-              ご提供いただきました実話が当選された場合、謝礼として5,000円分のQUOカードを贈呈！
+              ご提供いただきました実話が採用された場合、謝礼として5,000円分のQUOカードを贈呈！
             </p>
 
             <div className="divide-y divide-neutral-700">

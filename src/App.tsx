@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Title from './components/Title';
 import Introduction from './components/Introduction';
@@ -113,7 +113,6 @@ const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: 
 
 const AppRoutes: React.FC = () => {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
-  const navigate = useNavigate();
 
   const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
   const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
