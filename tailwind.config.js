@@ -5,7 +5,11 @@ export default {
     './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        'xl_custom': '1000px',
+      },
+    },
   },
   plugins: [
     require('@tailwindcss/typography'),

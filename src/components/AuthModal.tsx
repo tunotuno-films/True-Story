@@ -1,7 +1,88 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
-import AuthForm from './AuthForm';
+
+interface AuthFormProps {
+  onAuthSuccess: (email: string, name?: string) => void;
+  initialMode: 'signin' | 'signup';
+}
+
+const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess, initialMode }) => {
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      alert('Please enter email and password.');
+      return;
+    }
+    if (mode === 'signup' && !name) {
+      alert('Please enter your name for signup.');
+      return;
+    }
+    onAuthSuccess(email, mode === 'signup' ? name : undefined);
+  };
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-4">{mode === 'signin' ? 'Sign In' : 'Sign Up'}</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {mode === 'signup' && (
+          <div>
+            <label className="block text-sm font-medium mb-1">Name</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 rounded bg-neutral-800 border border-neutral-700 text-white"
+              placeholder="Your name"
+            />
+          </div>
+        )}
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-3 py-2 rounded bg-neutral-800 border border-neutral-700 text-white"
+            placeholder="you@example.com"
+            type="email"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Password</label>
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-3 py-2 rounded bg-neutral-800 border border-neutral-700 text-white"
+            placeholder="Password"
+            type="password"
+          />
+        </div>
+        <div>
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+          >
+            {mode === 'signin' ? 'Sign in' : 'Create account'}
+          </button>
+        </div>
+      </form>
+      <p className="text-sm text-gray-400 mt-3">
+        {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}{' '}
+        <button
+          type="button"
+          onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+          className="text-blue-400 hover:underline"
+        >
+          {mode === 'signin' ? 'Sign up' : 'Sign in'}
+        </button>
+      </p>
+    </div>
+  );
+};
 
 interface AuthModalProps {
   isOpen: boolean;

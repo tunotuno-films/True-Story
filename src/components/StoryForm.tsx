@@ -99,7 +99,12 @@ const StoryForm: React.FC<Props> = ({
           <p className="font-bold text-white">{applicationNotes.title}</p>
           {applicationNotes.sections.map((sec, idx) => (
             <div key={idx}>
-              <h5 className="font-bold text-white">{sec.title}</h5>
+              <h5
+                className="font-bold text-white"
+                id={sec.title.includes("個人情報の取り扱い") ? "privacy-policy" : undefined}
+              >
+                {sec.title}
+              </h5>
               <div className="text-neutral-300" dangerouslySetInnerHTML={{ __html: sec.html }} />
             </div>
           ))}
@@ -154,6 +159,7 @@ const StoryForm: React.FC<Props> = ({
 
         <form id="truestoryform" onSubmit={handleSubmit} className="flex flex-col h-full">
           <h4 className="text-left text-xl text-white mb-3 font-bold">応募フォーム</h4>
+          <p className="text-xs mb-2">入力内容はブラウザに自動保存されます。ページを閉じたり更新しても、後で編集を再開できます。</p>
           <div className="relative flex-grow">
             <textarea
               ref={storyTextareaRef}

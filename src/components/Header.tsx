@@ -128,7 +128,7 @@ const Header: React.FC = () => {
                 True Story【実話の物語】
               </div>
               
-              <div className="hidden md:flex items-center space-x-4 md:space-x-8">
+              <div className="hidden xl_custom:flex items-center space-x-4 md:space-x-8">
                 {navItems.map((item) => (
                   <button
                     key={item.id}
@@ -148,7 +148,7 @@ const Header: React.FC = () => {
                 </button>
               </div>
 
-              <div className="md:hidden">
+              <div className="xl_custom:hidden">
                 <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white">
                   {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
                 </button>
@@ -157,7 +157,7 @@ const Header: React.FC = () => {
           </div>
 
           <div 
-            className={`md:hidden bg-black/95 backdrop-blur-md absolute w-full z-40 shadow-lg border-t border-gray-700 transition-all duration-300 ease-in-out transform origin-top ${
+            className={`xl_custom:hidden bg-black/95 backdrop-blur-md absolute w-full z-40 shadow-lg border-t border-gray-700 transition-all duration-300 ease-in-out transform origin-top ${
               isMenuOpen 
                 ? 'opacity-100 scale-y-100 translate-y-0' 
                 : 'opacity-0 scale-y-0 -translate-y-2 pointer-events-none'
@@ -235,7 +235,7 @@ const Header: React.FC = () => {
                       <div key={index} className="inline-flex items-center mx-8 flex-shrink-0">
                         <div className="text-left">
                           <p className="text-xs font-noto text-neutral-300">
-                            {vote.voter_name || '匿名'} さん
+                            {vote.voter_name || '匿名'}より
                           </p>
                           <p className="text-sm font-noto">{vote.message}</p>
                         </div>
