@@ -115,7 +115,7 @@ const Artist: React.FC<ArtistProps> = ({ onShowPrivacyPolicy }) => {
           <h2 className="section-title text-4xl md:text-5xl text-center mb-4 gradient-text">
             ARTIST
           </h2>
-          <p className="font-noto text-lg text-center mb-12">2025年10月15日よりアーティスト募集開始予定</p>
+          <p className="font-noto text-lg text-center mb-12">まもなくアーティスト募集開始予定</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 max-w-6xl mx-auto">
             {staff.map((person) => {

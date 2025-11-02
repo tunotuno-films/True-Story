@@ -4,7 +4,7 @@ import { faYoutube, faInstagram } from '@fortawesome/free-brands-svg-icons';
 
 const Message: React.FC = () => {
   return (
-    <section id="message" className="py-20 md:py-32 bg-neutral-900">
+    <section id="message" className="py-20 md:py-32 bg-neutral-900 ">
       <div className="container mx-auto px-6 md:px-12">
         <h2 className="section-title text-4xl md:text-5xl text-center mb-4 gradient-text">MESSAGE</h2>
         <p className="font-noto text-lg text-center mb-12">代表のメッセージ</p>

@@ -90,24 +90,28 @@ const StoryForm: React.FC<Props> = ({
   return (
     <>
       <div className="mb-8 max-w-7xl mx-auto">
-        <h4 className="text-left text-xl text-white mb-3 font-bold">応募に関する注意事項</h4>
         <div
           ref={noticeRef}
           onScroll={handleScroll}
-          className="h-64 overflow-y-auto bg-neutral-800/30 p-4 border border-neutral-700 rounded-lg text-neutral-300 text-sm space-y-4"
+          className="h-64 overflow-y-auto bg-[#40848E] border border-gray-300 text-white text-sm"
         >
-          <p className="font-bold text-white">{applicationNotes.title}</p>
-          {applicationNotes.sections.map((sec, idx) => (
-            <div key={idx}>
-              <h5
-                className="font-bold text-white"
-                id={sec.title.includes("個人情報の取り扱い") ? "privacy-policy" : undefined}
-              >
-                {sec.title}
-              </h5>
-              <div className="text-neutral-300" dangerouslySetInnerHTML={{ __html: sec.html }} />
-            </div>
-          ))}
+          <div className="px-4 py-3 border-b border-gray-300 sticky top-0 bg-white">
+            <h4 className="text-left text-lg text-gray-900 font-bold">応募に関する注意事項</h4>
+          </div>
+          <div className="p-4 space-y-4">
+            <p className="font-bold text-white">{applicationNotes.title}</p>
+            {applicationNotes.sections.map((sec, idx) => (
+              <div key={idx}>
+                <h5
+                  className="font-bold text-white"
+                  id={sec.title.includes("個人情報の取り扱い") ? "privacy-policy" : undefined}
+                >
+                  {sec.title}
+                </h5>
+                <div className="text-white" dangerouslySetInnerHTML={{ __html: sec.html }} />
+              </div>
+            ))}
+          </div>
         </div>
         <div className="mt-4 flex items-center justify-center">
           <input
