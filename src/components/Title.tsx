@@ -47,7 +47,7 @@ const Title: React.FC = () => {
         >
           あなたの実話を募集中
         </button>
-        <p className="font-noto mt-2 md:mt-4 text-xs md:text-sm">募集期間: 2025.09.22 - 2025.10.31</p>
+        <p className="font-noto mt-2 md:mt-4 text-xs md:text-sm">募集期間: 2025.09.22 - 2025.11.31</p>
       </div>
       <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-10">
         <ChevronDown className="w-6 h-6 md:w-8 md:h-8 text-white" />

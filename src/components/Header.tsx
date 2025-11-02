@@ -10,6 +10,12 @@ interface Vote {
   voter_name: string | null;
 }
 
+interface NavItem {
+  id?: string;
+  path?: string;
+  label: string;
+}
+
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -43,7 +49,7 @@ const Header: React.FC = () => {
   };
 
   const scrollToSection = (sectionId: string) => {
-    if (window.location.pathname.startsWith('/users')) {
+    if (window.location.pathname !== '/') {
       navigate(`/#${sectionId}`);
     } else {
       const element = document.getElementById(sectionId);
@@ -59,14 +65,15 @@ const Header: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    if (window.location.pathname.startsWith('/users')) {
+    if (window.location.pathname !== '/') {
       navigate('/');
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  const navItems = [
+  const navItems: NavItem[] = [
+    { path: '/about', label: 'ABOUT' },
     { id: 'truestoryform', label: 'TRUE STORY' },
     { id: 'artist', label: 'ARTIST' },
     { id: 'crowdfunding', label: 'CROWDFUNDING' },
@@ -131,8 +138,14 @@ const Header: React.FC = () => {
               <div className="hidden xl_custom:flex items-center space-x-4 md:space-x-8">
                 {navItems.map((item) => (
                   <button
-                    key={item.id}
-                    onClick={() => scrollToSection(item.id)}
+                    key={item.label}
+                    onClick={() => {
+                      if (item.path) {
+                        navigate(item.path);
+                      } else if (item.id) {
+                        scrollToSection(item.id);
+                      }
+                    }}
                     className="text-neutral-300 hover:text-white transition duration-300 font-noto"
                   >
                     {item.label}
@@ -166,7 +179,7 @@ const Header: React.FC = () => {
             <div className="container mx-auto px-4 pb-4">
               {navItems.map((item, index) => (
                 <div 
-                  key={item.id}
+                  key={item.label}
                   className={`transition-all duration-300 ease-in-out ${
                     isMenuOpen 
                       ? 'opacity-100 translate-y-0' 
@@ -177,7 +190,14 @@ const Header: React.FC = () => {
                   }}
                 >
                   <button
-                    onClick={() => handleMobileLinkClick(item.id)}
+                    onClick={() => {
+                      if (item.path) {
+                        navigate(item.path);
+                        setIsMenuOpen(false);
+                      } else if (item.id) {
+                        handleMobileLinkClick(item.id);
+                      }
+                    }}
                     className="block w-full text-left py-4 px-4 text-neutral-300 hover:text-white hover:bg-gray-800/50 transition-all duration-300 font-noto rounded-md"
                   >
                     {item.label}

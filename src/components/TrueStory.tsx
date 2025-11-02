@@ -5,7 +5,6 @@ import IndividualAuthForm from './IndividualAuthForm';
 import GoogleAuthForm from './GoogleAuthForm';
 import { X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import StoryForm from './StoryForm';
 import SubmissionSuccess from './SubmissionSuccess';
 import ConfirmationModal from './ConfirmationModal';
@@ -16,7 +15,6 @@ interface TrueStoryProps {}
 
 const TrueStory: React.FC<TrueStoryProps> = () => {
   const { session } = useAuth();
-  const navigate = useNavigate();
   const [story, setStory] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -197,19 +195,20 @@ https://www.truestory.jp/
   };
 
   return (
-    <section className="py-20 md:py-32 bg-neutral-900">
+    <section className="py-20 md:py-32 bg-neutral-900" >
       <div className="container mx-auto px-6 md:px-12 max-w-4xl">
         <h2 className="section-title text-4xl md:text-5xl text-center mb-4 gradient-text">
           TRUE STORY
         </h2>
-        <p className="font-noto text-lg text-center text-neutral-300 mb-12">
+        <p className="font-noto text-lg text-center text-white mb-12">
           あなたの「実話の物語」を教えてください。
         </p>
 
-        {/* ... (rest of the JSX is the same) */}
-        
         <div className="max-w-3xl mx-auto mb-8">
-          <div className="bg-neutral-800/40 border border-neutral-700 rounded-lg p-4 md:p-6">
+          <div
+            className="border rounded-lg p-4 md:p-6"
+            style={{ backgroundColor: '#315477',  }}
+          >
             <div className="flex flex-col mb-4 relative">
               <h4 className="text-lg md:text-xl font-semibold text-white text-center py-4">
                 今回募集するテーマは5つ！
@@ -231,41 +230,41 @@ https://www.truestory.jp/
                 })()}
               </div>
             </div>
-            <p className="text-center text-neutral-300 text-base mb-4">
+            <p className="text-center text-white text-base mb-4">
               ご提供いただきました実話が採用された場合、謝礼として5,000円分のQUOカードを贈呈！
             </p>
 
             <div className="divide-y divide-neutral-700">
               <div className="py-3 flex items-center gap-4">
                 <div className="w-6 text-center text-white font-bold">1</div>
-                <div className="text-neutral-200">学生時代の葛藤と成長</div>
+                <div className="text-white">学生時代の葛藤と成長</div>
               </div>
 
               <div className="py-3 flex items-center gap-4">
                 <div className="w-6 text-center text-white font-bold">2</div>
-                <div className="text-neutral-200">恋愛や友情の転機</div>
+                <div className="text-white">恋愛や友情の転機</div>
               </div>
 
               <div className="py-3 flex items-center gap-4">
                 <div className="w-6 text-center text-white font-bold">3</div>
-                <div className="text-neutral-200">家族との絆のすれ違い</div>
+                <div className="text-white">家族との絆のすれ違い</div>
               </div>
 
               <div className="py-3 flex items-center gap-4">
                 <div className="w-6 text-center text-white font-bold">4</div>
-                <div className="text-neutral-200">デジタル社会での葛藤</div>
+                <div className="text-white">デジタル社会での葛藤</div>
               </div>
 
               <div className="py-3 flex items-center gap-4">
                 <div className="w-6 text-center text-white font-bold">5</div>
-                <div className="text-neutral-200">夢と挫折、挑戦と成長</div>
+                <div className="text-white">夢と挫折、挑戦と成長</div>
               </div>
             </div>
 
-            <p className="text-neutral-400 text-sm text-center mt-4">
+            <p className="text-white text-sm text-center mt-4">
               この5つのテーマから募集を行い、最終的に1つの物語を映像作品にします！
             </p>
-            <p className="text-neutral-400 text-xs text-center mt-2">
+            <p className="text-white text-xs text-center mt-2">
               ※ご応募いただく実話は、上記5つのテーマのうちいずれか1つに沿った内容でお願いいたします。
             </p>
           </div>
@@ -304,7 +303,7 @@ https://www.truestory.jp/
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="bg-neutral-900 rounded-lg shadow-lg p-8 w-full max-w-md relative mx-4">
               <button
-                className="absolute top-2 right-2 text-neutral-400 hover:text-white text-xl"
+                className="absolute top-2 right-2 text-white hover:text-white text-xl"
                 onClick={() => setShowAuthModal(false)}
                 type="button"
               >
@@ -314,7 +313,7 @@ https://www.truestory.jp/
               <GoogleAuthForm onAuthSuccess={handleAuthSuccess} />
               <div className="my-4 flex items-center">
                 <div className="flex-grow border-t border-neutral-600"></div>
-                <span className="flex-shrink mx-4 text-neutral-400 text-sm">または</span>
+                <span className="flex-shrink mx-4 text-white text-sm">または</span>
                 <div className="flex-grow border-t border-neutral-600"></div>
               </div>
               <IndividualAuthForm onAuthSuccess={handleAuthSuccess} />
@@ -322,7 +321,7 @@ https://www.truestory.jp/
           </div>
         )}
 
-        <div className="text-center text-xs text-neutral-500 mt-4">
+        <div className="text-center text-xs text-white mt-4">
           <p>個人を特定できる情報は含めないようご注意ください。</p>
           <p>「この物語を送信する」ボタンを押すことにより、<a href="#privacy-policy" className="text-cyan-400 hover:underline">個人情報の取り扱い</a>について同意したものとみなします。</p>
         </div>

@@ -16,6 +16,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import { default as MyPage } from './pages/User';
 import SponsorPage from './pages/Sponsor';
 import { IndividualMyPage } from './pages/Member';
+import About from './pages/About';
 import Seo from './components/Seo';
 import CountdownTimer from './components/CountdownTimer';
 import { seoKeywords } from './constants';
@@ -120,6 +121,7 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<MainPage openPrivacyPolicy={openPrivacyPolicy} closePrivacyPolicy={closePrivacyPolicy} showPrivacyPolicy={showPrivacyPolicy} />} />
+      <Route path="/about" element={<About />} />
       <Route path="/users" element={<MyPage />} />
       <Route path="/users/member" element={<IndividualMyPage />} />
       <Route path="/users/member/:userId" element={<IndividualMyPage />} />
