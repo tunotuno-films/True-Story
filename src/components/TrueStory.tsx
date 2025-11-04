@@ -216,9 +216,9 @@ https://www.truestory.jp/
               <div className="mt-2 flex justify-center md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 md:mt-0">
                 {/* 環境変数から読み込み。無ければ public 配下のフォールバック画像を使用し、警告を出す */}
                 {(() => {
-                  const QUO_CARD_IMAGE_URL = import.meta.env.VITE_QUO_CARD_IMAGE_URL ?? '/img/quo-card.jpg';
-                  if (!import.meta.env.VITE_QUO_CARD_IMAGE_URL) {
-                    console.warn('VITE_QUO_CARD_IMAGE_URL is not set. Using fallback image.');
+                  const QUO_CARD_IMAGE_URL = process.env.NEXT_PUBLIC_QUO_CARD_IMAGE_URL ?? '/img/st050011_quosmile_silver.jpg';
+                  if (!process.env.NEXT_PUBLIC_QUO_CARD_IMAGE_URL) {
+                    console.warn('NEXT_PUBLIC_QUO_CARD_IMAGE_URL is not set. Using fallback image.');
                   }
                   return (
                     <img

@@ -68,7 +68,7 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             const userName = `${sponsorMember.last_name || ''} ${sponsorMember.first_name || ''}`.trim() ||
                 user.user_metadata?.full_name ||
                 user.email || '';
-            onAuthSuccess(user.email || '', userName, user.id);
+            onAuthSuccess(user, 'sponsor');
             return;
         }
 
@@ -181,7 +181,7 @@ const SponsorAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             console.log('スポンサーメンバーの登録が完了しました:', insertData);
 
             const userName = `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
-            onAuthSuccess(formData.email, userName, user.id);
+            onAuthSuccess(user, 'sponsor');
 
             return;
           } catch (error) {

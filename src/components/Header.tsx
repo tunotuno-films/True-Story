@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '../lib/supabaseClient';
 import { Menu, X } from 'lucide-react';
 import CookieConsent from './CookieConsent';
@@ -17,7 +17,8 @@ interface NavItem {
 }
 
 const Header: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
+  const pathname = usePathname();
   const { session } = useAuth();
   const isLoggedIn = !!session;
 
@@ -49,8 +50,8 @@ const Header: React.FC = () => {
   };
 
   const scrollToSection = (sectionId: string) => {
-    if (window.location.pathname !== '/') {
-      navigate(`/#${sectionId}`);
+    if (pathname !== '/') {
+      router.push(`/#${sectionId}`);
     } else {
       const element = document.getElementById(sectionId);
       if (element) {
@@ -65,15 +66,15 @@ const Header: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    if (window.location.pathname !== '/') {
-      navigate('/');
+    if (pathname !== '/') {
+      router.push('/');
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const navItems: NavItem[] = [
-    { path: '/about', label: 'ABOUT' },
+    // { path: '/about', label: 'ABOUT' },
     { id: 'truestoryform', label: 'TRUE STORY' },
     { id: 'artist', label: 'ARTIST' },
     { id: 'crowdfunding', label: 'CROWDFUNDING' },
@@ -81,7 +82,7 @@ const Header: React.FC = () => {
   ];
 
   const handleMyPageClick = () => {
-    navigate('/users');
+    router.push('/users');
   };
 
   // ログイン中はマイページへ遷移、未ログイン時はメンバーシップへ
@@ -89,7 +90,7 @@ const Header: React.FC = () => {
     if (isLoggedIn) {
       const userId = session?.user?.id;
       if (userId) {
-        navigate(`/users/member/${userId}`);
+        router.push(`/users/member/${userId}`);
         return;
       }
       // fallback: メンバーシップ画面へ（session が取れない場合）
@@ -141,7 +142,7 @@ const Header: React.FC = () => {
                     key={item.label}
                     onClick={() => {
                       if (item.path) {
-                        navigate(item.path);
+                        router.push(item.path);
                       } else if (item.id) {
                         scrollToSection(item.id);
                       }
@@ -192,7 +193,7 @@ const Header: React.FC = () => {
                   <button
                     onClick={() => {
                       if (item.path) {
-                        navigate(item.path);
+                        router.push(item.path);
                         setIsMenuOpen(false);
                       } else if (item.id) {
                         handleMobileLinkClick(item.id);

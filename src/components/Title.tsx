@@ -2,10 +2,10 @@ import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
 // 環境変数から読み込み。無ければ public 配下のフォールバック画像を使用し、警告を出す
-const BG_IMAGE_URL = import.meta.env.VITE_BG_IMAGE_URL ?? '/images/default-bg.png';
-if (!import.meta.env.VITE_BG_IMAGE_URL) {
+const BG_IMAGE_URL = process.env.NEXT_PUBLIC_BG_IMAGE_URL ?? '/img/20250917_image1_ai.png';
+if (!process.env.NEXT_PUBLIC_BG_IMAGE_URL) {
   // 本番では環境変数を必ず設定してください（Vercel の Environment Variables を利用）
-  console.warn('VITE_BG_IMAGE_URL is not set. Using fallback image /images/20250917_image1_ai.png');
+  console.warn('NEXT_PUBLIC_BG_IMAGE_URL is not set. Using fallback image /img/20250917_image1_ai.png');
 }
 
 const Title: React.FC = () => {

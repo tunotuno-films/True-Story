@@ -10,11 +10,11 @@ const Message: React.FC = () => {
         <p className="font-noto text-lg text-center mb-12">代表のメッセージ</p>
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-16">
           {/* 1人目 */}
-          <div className="md:w-1/3">
+          <div className="md:w-1/3 flex justify-center">
             <img
               src="https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/00_hiroki%20ando.JPEG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvMDBfaGlyb2tpIGFuZG8uSlBFRyIsImlhdCI6MTc1NDI4NjI1MCwiZXhwIjo0ODc2MzUwMjUwfQ.pXSJY60xvZ3dxQxFWt1VHHT5SaKfGS7-rTS12JlCj1c"
               alt="アーティスト写真"
-              className="rounded-full shadow-lg w-64 md:w-full mx-auto aspect-square object-cover"
+              className="rounded-full shadow-lg w-64 h-64 object-cover"
             />
           </div>
           <div className="md:w-2/3">
@@ -52,11 +52,11 @@ const Message: React.FC = () => {
         </div>
         {/* 2人目 */}
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row-reverse items-center gap-8 md:gap-12">
-          <div className="md:w-1/3">
+          <div className="md:w-1/3 flex justify-center">
             <img
               src="https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/shoma.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvc2hvbWEuanBnIiwiaWF0IjoxNzU1OTY3ODQ5LCJleHAiOjQ4NzgwMzE4NDl9.xs2gvkKeEU7hEU4Rh-qKyTrLHIUc7Dkq4d8yfW6dX4s"
               alt="2人目アーティスト写真"
-              className="rounded-full shadow-lg w-64 md:w-full mx-auto aspect-square object-cover"
+              className="rounded-full shadow-lg w-64 h-64 object-cover"
             />
           </div>
           <div className="md:w-2/3">

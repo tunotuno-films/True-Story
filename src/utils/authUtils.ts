@@ -89,12 +89,9 @@ export const getRedirectURL = () => {
     return String(process.env.REACT_APP_SITE_URL).replace(/\/$/, '');
   }
 
-  // 2) Vite 等の import.meta.env をチェック（デプロイ環境）
-  if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
-    const metaEnv = (import.meta as any).env;
-    if (metaEnv.VITE_SITE_URL) return String(metaEnv.VITE_SITE_URL).replace(/\/$/, '');
-    if (metaEnv.REACT_APP_SITE_URL) return String(metaEnv.REACT_APP_SITE_URL).replace(/\/$/, '');
-    if (metaEnv.SITE_URL) return String(metaEnv.SITE_URL).replace(/\/$/, '');
+  // 2) Next.js の process.env をチェック
+  if (typeof process !== 'undefined' && process?.env?.NEXT_PUBLIC_SITE_URL) {
+    return String(process.env.NEXT_PUBLIC_SITE_URL).replace(/\/$/, '');
   }
 
   // 3) ブラウザ実行時かつローカルホストなら現在の origin を最優先（ポートも含む）
