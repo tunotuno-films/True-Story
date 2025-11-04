@@ -29,5 +29,3 @@ dist-ssr
 .vercel
 
 .next
-
-tsconfig.json

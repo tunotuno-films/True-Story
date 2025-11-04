@@ -11,12 +11,12 @@ import PrivacyPolicy from '../../components/PrivacyPolicy';
 const pastEvents = [
   {
     id: 2,
-    title: "第2回 True Story",
-    date: "2024年10月26日",
-    theme: "秘密",
+    title: "貴女",
+    date: "2023年03月",
+    theme: "青春×ジェンダー",
     winner: "山田 花子",
     storyTitle: "屋根裏の宝物",
-    youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    youtubeUrl: "https://www.youtube.com/embed/csPUmFAp584?si=kyneQK9XCRUZZL35",
     description: "第2回目の開催となった今回は「秘密」をテーマに、参加者それぞれの心に秘めた物語が語られました。優勝作品「屋根裏の宝物」は、幼少期の思い出と家族の絆を描いた感動的なストーリーでした。",
     images: [
       "/img/event2-1.jpg",
@@ -33,12 +33,12 @@ const pastEvents = [
   },
   {
     id: 1,
-    title: "第1回 True Story",
-    date: "2024年4月20日",
+    title: "クリスマスの奇跡",
+    date: "2022年12月",
     theme: "始まり",
     winner: "佐藤 太郎",
     storyTitle: "最初の一歩",
-    youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    youtubeUrl: "https://www.youtube.com/embed/rLNvit2_p3Y?si=NP8jTLRTGSi8cGwZ",
     description: "記念すべき第1回目の開催。「始まり」をテーマに、新しい挑戦や人生の転機となった出来事について語られました。優勝作品「最初の一歩」は、夢を追いかけ始めた若者の勇気ある決断を描いた作品です。",
     images: [
       "/img/event1-1.jpg",
@@ -193,9 +193,7 @@ const AboutPage = () => {
                           
                           {/* YouTube埋め込み */}
                           <div className="mb-6">
-                            <h4 className="text-lg font-semibold mb-3 text-white flex items-center">
-                              <span className="mr-2">📹</span> イベント動画
-                            </h4>
+                            
                             <div className="aspect-video rounded-lg overflow-hidden shadow-lg border border-neutral-800">
                               <iframe
                                 width="100%"
