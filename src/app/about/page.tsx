@@ -193,9 +193,7 @@ const AboutPage = () => {
                           
                           {/* YouTube埋め込み */}
                           <div className="mb-6">
-                            <h4 className="text-lg font-semibold mb-3 text-white flex items-center">
-                              <span className="mr-2">📹</span> イベント動画
-                            </h4>
+                            
                             <div className="aspect-video rounded-lg overflow-hidden shadow-lg border border-neutral-800">
                               <iframe
                                 width="100%"
