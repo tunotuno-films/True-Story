@@ -19,7 +19,7 @@ export interface AuthFormData {
 }
 
 export interface AuthFormProps {
-  onAuthSuccess: (email: string, name?: string, authUserId?: string) => void;
+  onAuthSuccess: (user: { id: string; email?: string; [key: string]: any }, userType: 'individual' | 'sponsor') => void;
   initialMode?: 'signin' | 'signup';
 }
 

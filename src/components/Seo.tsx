@@ -1,8 +1,7 @@
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import Head from 'next/head';
 
 // 環境変数から既定のOG画像を取得
-const DEFAULT_OG_IMAGE = import.meta.env.VITE_OG_IMAGE_URL || '';
+const DEFAULT_OG_IMAGE = process.env.NEXT_PUBLIC_OG_IMAGE_URL || '';
 
 type SeoProps = {
   title?: string;
@@ -18,7 +17,7 @@ const Seo: React.FC<SeoProps> = ({ title, description, keywords, url, image }) =
   const fullTitle = `${title} | ${siteName}`;
 
   return (
-    <Helmet>
+    <Head>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords?.join(', ')} />
@@ -40,7 +39,7 @@ const Seo: React.FC<SeoProps> = ({ title, description, keywords, url, image }) =
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
       <meta name="twitter:image:alt" content={title || 'True Story'} />
-    </Helmet>
+    </Head>
   );
 };
 

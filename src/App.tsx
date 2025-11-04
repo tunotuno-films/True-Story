@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Title from './components/Title';
 import Introduction from './components/Introduction';
@@ -13,10 +12,6 @@ import Contact from './components/Contact';
 import SponsorSection from './components/Sponsor';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
-import { default as MyPage } from './pages/User';
-import SponsorPage from './pages/Sponsor';
-import { IndividualMyPage } from './pages/Member';
-import About from './pages/About';
 import Seo from './components/Seo';
 import CountdownTimer from './components/CountdownTimer';
 import { seoKeywords } from './constants';
@@ -81,7 +76,7 @@ const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: 
         title="True Story【実話の物語】| これは、あなたの物語かもしれない。"
         description="実話を基に楽曲制作・映像制作を行うTrue Story【実話の物語】。誰かの実話で、誰かが歌い、誰かが演じます。決まったマニュアルはありません。"
         keywords={typeof seoKeywords === 'string' ? seoKeywords.split(',').map(k => k.trim()).filter(Boolean) : seoKeywords}
-        url={import.meta.env.VITE_APP_BASE_URL || 'http://localhost:5173'}
+        url={process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}
       />
       
       <Header />
@@ -112,32 +107,26 @@ const MainPage = ({ openPrivacyPolicy, closePrivacyPolicy, showPrivacyPolicy }: 
   );
 };
 
-const AppRoutes: React.FC = () => {
+function App() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  const openPrivacyPolicy = () => setShowPrivacyPolicy(true);
-  const closePrivacyPolicy = () => setShowPrivacyPolicy(false);
+  const openPrivacyPolicy = () => {
+    setShowPrivacyPolicy(true);
+  };
 
-  return (
-    <Routes>
-      <Route path="/" element={<MainPage openPrivacyPolicy={openPrivacyPolicy} closePrivacyPolicy={closePrivacyPolicy} showPrivacyPolicy={showPrivacyPolicy} />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/users" element={<MyPage />} />
-      <Route path="/users/member" element={<IndividualMyPage />} />
-      <Route path="/users/member/:userId" element={<IndividualMyPage />} />
-      <Route path="/users/sponsor" element={<SponsorPage />} />
-      <Route path="/users/sponsor/:id" element={<SponsorPage />} />
-    </Routes>
-  );
-};
+  const closePrivacyPolicy = () => {
+    setShowPrivacyPolicy(false);
+  };
 
-function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppRoutes />
-        <Analytics debug={false} />
-      </Router>
+        <div className="App">
+          <MainPage openPrivacyPolicy={openPrivacyPolicy} closePrivacyPolicy={closePrivacyPolicy} showPrivacyPolicy={showPrivacyPolicy} />
+          {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
+          <Analytics />
+          <CountdownTimer />
+          <SocialLinks />
+        </div>
     </AuthProvider>
   );
 }

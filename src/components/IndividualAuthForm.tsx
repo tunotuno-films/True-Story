@@ -12,7 +12,7 @@ import {
   checkMemberExists, // 追加
   robustSignOut // 追加
 } from '../utils/authUtils';
-import { useNavigate } from 'react-router-dom'; // 追加
+import { useRouter } from 'next/navigation'; // 変更
 import LoginErrorModal from './LoginErrorModal'; // 追加
 
 // 新しいメンバーIDを生成する関数
@@ -70,7 +70,7 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   const [isCheckingMember, setIsCheckingMember] = useState(false); // 追加
   const [showLoginErrorModal, setShowLoginErrorModal] = useState(false); // 追加
   const [loginErrorMessage, setLoginErrorMessage] = useState(''); // 追加
-  const navigate = useNavigate(); // 追加
+  const router = useRouter(); // 追加
 
   const passwordStrength = calculatePasswordStrength(formData.password || '');
 
@@ -98,76 +98,56 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
         console.log('IndividualAuthForm - 認証状態の変更:', event, session?.user?.id);
         
         if (event === 'SIGNED_IN' && session?.user) {
-          const user = session.user;
-          const isGoogleAuth = user.app_metadata?.provider === 'google';
-          
-          if (isGoogleAuth) {
-            console.log('IndividualAuthForm - Google認証が検出されました。', user.id);
-            setIsCheckingMember(true);
-            
-            const timeout = setTimeout(async () => {
-              console.log('Member check timeout - ユーザーをログアウトします。');
-              try {
-                await supabase.auth.signOut();
-                setIsCheckingMember(false);
-                setShowAdditionalInfo(false);
-                setGoogleUser(null);
-                navigate('/users'); // タイムアウト時はユーザータイプ選択に戻る
-              } catch (error) {
-                console.error('Timeout logout error:', error);
-              }
-            }, 5000);
+          setIsCheckingMember(true);
+          setGoogleUser(session.user);
 
-            try {
-              const existingMember = await checkMemberExists(user.id);
-              clearTimeout(timeout);
-
-              console.log('IndividualAuthForm - メンバー確認結果:', existingMember);
-
-              if (!existingMember) {
-                console.log('IndividualAuthForm - 既存のメンバーが見つかりませんでした。追加情報フォームを表示します。');
-                setGoogleUser(user);
-                setFormData(prev => ({
-                  ...prev,
-                  email: user.email || '',
-                  nickname: user.user_metadata?.full_name || user.user_metadata?.name || ''
-                }));
-                setShowAdditionalInfo(true);
-                setIsCheckingMember(false);
-              } else if (existingMember.user_type === 'individual') {
-                console.log('IndividualAuthForm - 既存の個人メンバーが見つかりました。ログインを続行します。');
-                const userName = existingMember.nickname || `${existingMember.last_name} ${existingMember.first_name}`;
-                setIsCheckingMember(false);
-                onAuthSuccess(user.email || '', userName, user.id);
-              } else {
-                // Google認証でログインしたが、個人会員ではない場合
-                console.log('IndividualAuthForm - Google認証ユーザーは個人会員ではありません。/usersにリダイレクトします。');
-                await robustSignOut(); // ログアウトしてユーザータイプ選択に戻す
-                navigate('/users');
-              }
-            } catch (error) {
-              clearTimeout(timeout);
-              console.error('Member check error:', error);
-              setGoogleUser(user);
-              setFormData(prev => ({
-                ...prev,
-                email: user.email || '',
-                nickname: ''
-              }));
-              setShowAdditionalInfo(true);
+          // タイムアウト処理
+          const timeoutId = setTimeout(() => {
+            if (isCheckingMember) {
+              console.warn('メンバーシップチェックがタイムアウトしました。');
+              robustSignOut();
+              setLoginErrorMessage('タイムアウトしました。もう一度お試しください。');
+              setShowLoginErrorModal(true);
               setIsCheckingMember(false);
+              router.push('/users'); // タイムアウト時はユーザータイプ選択に戻る
             }
+          }, 15000); // 15秒
+
+          try {
+            const memberExists = await checkMemberExists(session.user.id);
+            console.log('メンバーシップチェック結果:', memberExists);
+
+            if (memberExists) {
+              // 既存メンバーの場合
+              console.log('既存メンバーとしてログインします。');
+              onAuthSuccess(session.user, 'individual');
+            } else {
+              // 新規メンバーの場合
+              console.log('新規メンバー登録フローを開始します。');
+              setShowAdditionalInfo(true);
+            }
+          } catch (error) {
+            console.error('メンバーシップチェック中にエラー:', error);
+            robustSignOut();
+            setLoginErrorMessage('エラーが発生しました。もう一度お試しください。');
+            setShowLoginErrorModal(true);
+            router.push('/users');
+          } finally {
+            clearTimeout(timeoutId);
+            setIsCheckingMember(false);
           }
-        } else if (event === 'SIGNED_OUT') {
-          setShowAdditionalInfo(false);
-          setGoogleUser(null);
-          setIsCheckingMember(false);
         }
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, [onAuthSuccess, navigate]);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [onAuthSuccess, router]);
+
+  const handleGoogleSignIn = async () => {
+    await handleGoogleAuth();
+  };
 
   // 初回ロード時の現在セッションチェックも追加 (AuthFormから移植)
   useEffect(() => {
@@ -180,7 +160,7 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
             window.location.hash.includes('error') ||
             window.location.hash.includes('provider_token'))
         ) {
-          console.log('IndividualAuthForm - URLハッシュからの認証コールバック処理中...');
+          console.log('IndividualAuthForm -  URLハッシュからの認証コールバック処理中...');
           try {
             const { error } = await supabase.auth.getSession();
             if (error) {
@@ -222,13 +202,13 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           } else if (existingMember.user_type === 'individual') {
             console.log('IndividualAuthForm - 既存の個人メンバーが見つかりました。ログインを続行します。');
             const userName = existingMember.nickname || `${existingMember.last_name} ${existingMember.first_name}`;
-            onAuthSuccess(user.email || '', userName, user.id);
+            onAuthSuccess({ ...user, name: userName }, 'individual');
             setIsCheckingMember(false); // Ensure loading state is cleared
             return; // Important: Exit after calling onAuthSuccess
           } else {
             console.log('IndividualAuthForm - Google認証ユーザーは個人会員ではありません。/usersにリダイレクトします。');
             await robustSignOut();
-            navigate('/users');
+            router.push('/users');
           }
           
           setIsCheckingMember(false);
@@ -237,181 +217,84 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
     };
 
     checkCurrentSession();
-  }, [onAuthSuccess, navigate]);
+  }, [onAuthSuccess, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       if (authMode === 'signin') {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password || '',
-        });
-
-        if (error) throw error;
-        const user = data?.user;
-        if (!user) {
-          setLoginErrorMessage('ログインに失敗しました。');
-          setShowLoginErrorModal(true);
-          return;
-        }
-
-        // 1. Check if the user is an individual member
-        const { data: individualMember, error: individualError } = await supabase
-            .from('individual_members')
-            .select('*')
-            .eq('auth_user_id', user.id)
-            .maybeSingle();
-
-        if (individualError) throw individualError;
-
-        if (individualMember) {
-            // Login success
-            const pendingSubmission = localStorage.getItem('pendingStorySubmission');
-            if (pendingSubmission) {
-              localStorage.removeItem('pendingStorySubmission');
-              navigate('/#truestoryform');
-            } else {
-              const userName = individualMember.nickname ||
-                  `${individualMember.last_name || ''} ${individualMember.first_name || ''}`.trim() ||
-                  user.user_metadata?.full_name ||
-                  user.email || '';
-              onAuthSuccess(user.email || '', userName, user.id);
-            }
-            return;
-        }
-
-        // 2. If not an individual member, check if they are a sponsor member
-        const { data: sponsorMember, error: sponsorError } = await supabase
-            .from('sponsor_members')
-            .select('id')
-            .eq('auth_user_id', user.id)
-            .maybeSingle();
-
-        if (sponsorError) throw sponsorError;
-
-        if (sponsorMember) {
-            // User is a sponsor, show error and sign out
-            setLoginErrorMessage('このアカウントはスポンサーアカウントです。個人会員としてログインするには、個人アカウントをご利用ください。');
-            setShowLoginErrorModal(true);
-            await supabase.auth.signOut();
-            return;
-        }
-        
-        // 3. If user exists in neither table, proceed to additional info form
-        // This case handles users who have completed email verification but not yet created a member profile.
-        setAuthenticatedUser(user);
-        setFormData(prev => ({
-            ...prev,
-            email: user.email || '',
-            lastName: user.user_metadata?.last_name || '',
-            firstName: user.user_metadata?.first_name || '',
-            nickname: user.user_metadata?.nickname || ''
-        }));
-        setShowAdditionalInfo(true);
-        return;
-      } else { // signup
-        // Check for duplicate email in both tables
-        const { data: existingIndividual, error: individualError } = await supabase
-          .from('individual_members')
-          .select('email')
-          .eq('email', formData.email)
-          .maybeSingle();
-
-        if (individualError) {
-          throw new Error('メールアドレスの確認中にエラーが発生しました。');
-        }
-
-        const { data: existingSponsor, error: sponsorError } = await supabase
-          .from('sponsor_members')
-          .select('email')
-          .eq('email', formData.email)
-          .maybeSingle();
-
-        if (sponsorError) {
-          throw new Error('メールアドレスの確認中にエラーが発生しました。');
-        }
-
-        if (existingIndividual || existingSponsor) {
-          setLoginErrorMessage('このメールアドレスはすでに登録されています。');
-          setShowLoginErrorModal(true);
-          return;
-        }
-
-        const { data, error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password || '',
-          options: {
-            data: {
-              last_name: formData.lastName,
-              first_name: formData.firstName,
-              nickname: formData.nickname,
-              full_name: `${formData.lastName || ''} ${formData.firstName || ''}`.trim(),
-            },
-          },
-        });
-
-        if (error) throw error;
-
-        const user = data?.user;
-        
-        if (!user) {
-          setLoginErrorMessage('ユーザー登録に失敗しました。');
-          setShowLoginErrorModal(true);
-          return;
-        }
-        
-        if (!user.email_confirmed_at) {
-          setShowEmailConfirmModal(true);
-          return;
-        }
-
-        // Start retry loop for member insertion
-        const maxAttempts = 5;
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          try {
-            const memberId = await generateNewMemberId();
-
-            const { error: insertError } = await supabase.from('individual_members').insert({
-              member_id: memberId,
-              auth_user_id: user.id,
-              last_name: formData.lastName,
-              first_name: formData.firstName,
-              birth_date: formatBirthDate(formData.birthYear, formData.birthMonth, formData.birthDay),
-              gender: formData.gender,
-              email: formData.email,
-              phone_number: formData.phoneNumber,
-              nickname: formData.nickname,
-            });
-
-            if (insertError) {
-              if (insertError.code === '23505' && attempt < maxAttempts) {
-                console.warn(`Attempt ${attempt}: Duplicate member_id ${memberId}. Retrying...`);
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100));
-                continue; // Go to next attempt
-              }
-              throw insertError;
-            }
-
-            // --- SUCCESS ---
-            const userName = formData.nickname || `${formData.lastName || ''} ${formData.firstName || ''}`.trim();
-            onAuthSuccess(formData.email, userName, user.id);
-            return; // Exit function on success
-
-          } catch (err) {
-            console.error(`Attempt ${attempt} failed during signup:`, err);
-            if (attempt >= maxAttempts) {
-              throw err; // Rethrow the last error to be caught by the outer catch block
-            }
-          }
-        }
+        await handleSignIn(e);
+      } else {
+        await handleSignUp(e);
       }
-    } catch (err) {
-      console.error('Authentication error:', err);
-      setLoginErrorMessage('認証中にエラーが発生しました: ' + ((err as Error).message || String(err)));
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setLoginErrorMessage('フォームの送信中にエラーが発生しました。');
       setShowLoginErrorModal(true);
     }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password ?? '',
+      });
+
+      if (error) {
+        console.error('Signup error:', error.message);
+        setLoginErrorMessage(error.message);
+        setShowLoginErrorModal(true);
+        return;
+      }
+
+      if (data.user) {
+        setAuthenticatedUser(data.user);
+        setShowEmailConfirmModal(true);
+      }
+    } catch (error) {
+      console.error('Signup process error:', error);
+      setLoginErrorMessage('サインアップ処理中に予期せぬエラーが発生しました。');
+      setShowLoginErrorModal(true);
+    }
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password ?? '',
+      });
+
+      if (error) {
+        console.error('Signin error:', error.message);
+        setLoginErrorMessage(error.message);
+        setShowLoginErrorModal(true);
+        return;
+      }
+
+      if (data.user) {
+        const memberExists = await checkMemberExists(data.user.id);
+        if (memberExists) {
+          onAuthSuccess(data.user, 'individual');
+        } else {
+          // メール認証は済んでいるが、メンバー情報がない場合
+          setAuthenticatedUser(data.user);
+          setShowAdditionalInfo(true);
+        }
+      }
+    } catch (error) {
+      console.error('Signin process error:', error);
+      setLoginErrorMessage('サインイン処理中に予期せぬエラーが発生しました。');
+      setShowLoginErrorModal(true);
+    }
+  };
+
+  const handleBackToSelection = () => {
+    router.push('/users');
   };
 
   const handleAdditionalInfoSubmit = async (e: React.FormEvent) => {
@@ -458,9 +341,9 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
         const pendingSubmission = localStorage.getItem('pendingStorySubmission');
         if (pendingSubmission) {
           localStorage.removeItem('pendingStorySubmission');
-          navigate('/#truestoryform');
+          router.push('/#truestoryform');
         } else {
-          onAuthSuccess(targetUser.email, userName, targetUser.id);
+          onAuthSuccess(targetUser, 'individual');
         }
         return; // Exit function on success
 
@@ -479,7 +362,7 @@ const IndividualAuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
     await robustSignOut();
     setShowAdditionalInfo(false);
     setGoogleUser(null);
-    navigate('/users');
+    router.push('/users');
   };
 
   const closeEmailConfirmModal = () => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 interface LoginRedirectModalProps {
   isOpen: boolean;
@@ -13,7 +13,7 @@ const LoginRedirectModal: React.FC<LoginRedirectModalProps> = ({
   countdownDuration = 5,
 }) => {
   const [countdown, setCountdown] = useState(countdownDuration);
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [isRendering, setIsRendering] = useState(false);
 
@@ -36,7 +36,7 @@ const LoginRedirectModal: React.FC<LoginRedirectModalProps> = ({
     if (!isOpen) return;
 
     if (countdown <= 0) {
-      navigate('/users/member');
+      router.push('/users/member');
       onClose();
       return;
     }
@@ -46,7 +46,7 @@ const LoginRedirectModal: React.FC<LoginRedirectModalProps> = ({
     }, 1000);
 
     return () => clearTimeout(timerId);
-  }, [isOpen, countdown, navigate, onClose]);
+  }, [isOpen, countdown, router, onClose]);
 
   if (!isRendering) return null;
 

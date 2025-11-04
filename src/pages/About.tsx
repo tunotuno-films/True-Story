@@ -17,7 +17,7 @@ const About: React.FC = () => {
         title="このプロジェクトについて | True Story【実話の物語】"
         description="True Story【実話の物語】は、そんな時代にこそ「人が生きてきた本当の物語」に光を当てるプロジェクトです。"
         keywords={typeof seoKeywords === 'string' ? seoKeywords.split(',').map(k => k.trim()).filter(Boolean) : seoKeywords}
-        url={`${import.meta.env.VITE_APP_BASE_URL}/about`}
+        url={`${process.env.NEXT_PUBLIC_BASE_URL}/about`}
       />
       <Header />
       <main className="pt-24 pb-32">
