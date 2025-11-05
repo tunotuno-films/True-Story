@@ -208,29 +208,9 @@ const AboutPage = () => {
                             </div>
                           </div>
                           
-                          {/* 優勝者情報 */}
-                          <div className="bg-gradient-to-r from-yellow-900/30 to-orange-900/30 p-6 rounded-lg mb-6 border-l-4 border-yellow-400">
-                            <div className="flex items-center mb-2">
-                              <span className="text-2xl mr-2">🏆</span>
-                              <h4 className="text-xl font-bold text-white">優勝作品</h4>
-                            </div>
-                            <p className="text-xl font-semibold text-yellow-400 mb-1">「{event.storyTitle}」</p>
-                            <p className="text-neutral-300">語り手: {event.winner}</p>
-                          </div>
                           
-                          {/* ハイライト */}
-                          <div className="mb-6">
-                            <h4 className="text-lg font-semibold mb-3 text-white flex items-center">
-                              <span className="mr-2">📊</span> イベントハイライト
-                            </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              {event.highlights.map((highlight, idx) => (
-                                <div key={idx} className="bg-neutral-800 p-3 rounded-md text-sm text-neutral-300 border border-neutral-700">
-                                  {highlight}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                          
+                          
                           
                           {/* 画像ギャラリー */}
                           <div>
