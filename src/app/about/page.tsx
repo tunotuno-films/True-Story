@@ -206,6 +206,10 @@ const AboutPage = () => {
                                 className="w-full h-full"
                               ></iframe>
                             </div>
+
+                            <div className="aspect-video rounded-lg overflow-hidden shadow-lg border border-neutral-800">
+                              <iframe width="560" height="315" src="https://www.youtube.com/embed/csPUmFAp584?si=nNiPj6m1mS38p2UD" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
+                            </div>
                           </div>
                           
                           
