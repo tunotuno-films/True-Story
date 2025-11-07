@@ -224,7 +224,7 @@ const AboutPage = () => {
                                     alt={`${event.title} - 写真 ${idx + 1}`}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     onError={(e) => {
-                                      e.currentTarget.src = 'https://via.placeholder.com/400x400/1a1a1a/4ade80?text=Coming+Soon';
+                                      e.currentTarget.src = 'https://placehold.co/400x400/1a1a1a/4ade80?text=Coming+Soon';
                                     }}
                                   />
                                 </div>
