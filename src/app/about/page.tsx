@@ -7,6 +7,9 @@ import About from '@/pages/About';
 import Seo from '@/components/Seo';
 import { seoKeywords } from '../../constants';
 import PrivacyPolicy from '../../components/PrivacyPolicy';
+import Message from '@/components/Message';
+import Highlight from "@/components/Highlight";
+
 
 const pastEvents = [
   {
@@ -17,7 +20,7 @@ const pastEvents = [
     winner: "山田 花子",
     storyTitle: "屋根裏の宝物",
     youtubeUrl: "https://www.youtube.com/embed/csPUmFAp584?si=kyneQK9XCRUZZL35",
-    description: "第2回目の開催となった今回は「秘密」をテーマに、参加者それぞれの心に秘めた物語が語られました。優勝作品「屋根裏の宝物」は、幼少期の思い出と家族の絆を描いた感動的なストーリーでした。",
+    description: "2作目は、「コロナ禍の青春とジェンダー」をテーマに、約40名の出演者やスタッフによって制作されました。MVや映画などで活躍中の女優・実倉萌笑、NHK「わんわんワンダーランド」レギュラー出演経歴のある俳優・けいいちろう、ダンサーとして多くのYouTuberに振り付け指導を行い、国内CMにも携わっているダンサー兼モデル・Yuukiの三人の主演による、純愛な青春が次第に同性愛へと変わっていく、True Story【実話の物語】にふさわしい泣ける物語となっている。シンガーは、今Z世代でも注目を集めている、浜野はるきが作詞を行い、起案者でもあり作編曲家の翔馬-Shoma-が作曲を行なった。",
     images: [
       "/img/event2-1.jpg",
       "/img/event2-2.jpg",
@@ -39,7 +42,7 @@ const pastEvents = [
     winner: "佐藤 太郎",
     storyTitle: "最初の一歩",
     youtubeUrl: "https://www.youtube.com/embed/rLNvit2_p3Y?si=NP8jTLRTGSi8cGwZ",
-    description: "記念すべき第1回目の開催。「始まり」をテーマに、新しい挑戦や人生の転機となった出来事について語られました。優勝作品「最初の一歩」は、夢を追いかけ始めた若者の勇気ある決断を描いた作品です。",
+    description: "記念すべき1作目は「クリスマスの奇跡」をテーマに、backnumberのクリスマスソングをシンガーソングライターのゆうけいがカバー。MVや映画などで活躍中の女優・実倉萌笑、NHK「わんわんワンダーランド」レギュラー出演経歴のある俳優・けいいちろうが、クリスマスで起こった奇跡の物語を演じます。",
     images: [
       "/img/event1-1.jpg",
       "/img/event1-2.jpg",
@@ -73,7 +76,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-emerald-400 to-teal-400 text-transparent bg-clip-text">
-              True Story【実話の物語】をやる理由
+              True Story【実話の物語】とは？
             </h1>
 
             {/* プロジェクト概要 */}
@@ -86,59 +89,24 @@ const AboutPage = () => {
                   その一方で、SNSフェイクニュースや匿名の言葉があふれ、真実と虚構の境界が曖昧になり、人と人との心の距離が広がっているようにも感じます。
                 </p>
                 <p>
-                  <strong className="text-white">True Story【実話の物語】</strong>は、そんな時代にこそ「人が生きてきた本当の物語」に光を当てるプロジェクトです。
+                  True Story【実話の物語】は、そんな時代にこそ「人が生きてきた本当の物語」に光を当てるプロジェクトです。
                 </p>
                 <p>
-                  誰かの実体験をもとに、音楽と映像を通して“真実の記録”として残す。AIでは再現できない、人の心にしか生み出せないあたたかさや、痛み、希望を表現していきます。
+                   <Highlight>誰かの実体験をもとに、音楽と映像を通して“真実の記録”として残す。</Highlight>AIでは再現できない、人の心にしか生み出せないあたたかさや、痛み、希望を表現していきます。
                 </p>
                 <p>
                   世の中には、まだ知られていないけれど、きっと誰かの背中を押す力を持ったストーリーがたくさんあります。その一つひとつを「実話」として掘り起こし、誰かが詩にし、アーティストやクリエイターが作品として形にしていく。そこに生まれる共感や対話こそが、次の誰かを救うきっかけになると信じています。
                 </p>
                 <p>
-                  出所のわからない情報に流されるのではなく、“人が創り、人が伝える”という原点に立ち返る。私たちは、そんな想いを共有してくださるすべての方々とともに、「真実の声が響く社会」を創り続けていきます。
+                  出所のわからない情報に流されるのではなく、<Highlight>“人が創り、人が伝える”</Highlight>という原点に立ち返る。私たちは、そんな想いを共有してくださるすべての方々とともに、「真実の声が響く社会」を創り続けていきます。
                 </p>
               </div>
             </section>
 
             {/* 代表メッセージ */}
             <section>
-              {/* 翔馬さん */}
-              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-16">
-                <div className="md:w-1/3">
-                  <img
-                    src="https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/shoma.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvc2hvbWEuanBnIiwiaWF0IjoxNzU1OTY3ODQ5LCJleHAiOjQ4NzgwMzE4NDl9.xs2gvkKeEU7hEU4Rh-qKyTrLHIUc7Dkq4d8yfW6dX4s"
-                    alt="翔馬-Shoma"
-                    className="rounded-full shadow-lg w-48 h-48 md:w-64 md:h-64 mx-auto object-cover"
-                  />
-                  <p className="font-noto font-bold text-lg text-center mt-4">翔馬-Shoma</p>
-                </div>
-                <div className="md:w-2/3 bg-neutral-900 p-6 rounded-lg">
-                  <p className="font-noto text-base leading-loose text-neutral-300">
-                    SNSで言うとフェイクニュースが当たり前のように出回っている。そのフェイクニュースで知らない人同士がぶつかっている。その情報の親和性をあたらめて認識してもらう。
-                    <br /><br />
-                    音楽も映像もAIで誰でも作れる時代になったが、実際に人が体験したストーリーを人が制作する。人間味がある、人ならではの良さ、あたたかさ、フェイクニュースではない本当の実話と記憶、人間の真偽。
-                  </p>
-                </div>
-              </div>
-
-              {/* 安藤さん */}
-              <div className="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-12 mb-24">
-                <div className="md:w-1/3">
-                  <img
-                    src="https://npxqbgysjxykcykaiutm.supabase.co/storage/v1/object/sign/img/00_hiroki%20ando.JPEG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xOGQ3YjhmZS03YWM0LTQyYWQtOGQyNS03YzU3Y2NjNjExNzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWcvMDBfaGlyb2tpIGFuZG8uSlBFRyIsImlhdCI6MTc1NDI4NjI1MCwiZXhwIjo0ODc2MzUwMjUwfQ.pXSJY60xvZ3dxQxFWt1VHHT5SaKfGS7-rTS12JlCj1c"
-                    alt="Hiroki Ando"
-                    className="rounded-full shadow-lg w-48 h-48 md:w-64 md:h-64 mx-auto object-cover"
-                  />
-                  <p className="font-noto font-bold text-lg text-center mt-4">Hiroki Ando</p>
-                </div>
-                <div className="md:w-2/3 bg-neutral-900 p-6 rounded-lg">
-                  <p className="font-noto text-base leading-loose text-neutral-300">
-                    世の中に埋もれているが、表に出した方がいいストーリー（そのストーリーで誰かが救われる）がある。その誰かの実話を誰かが詩にして、True Story【実話の物語】が制作する。
-                    <br /><br />
-                    共感もあれば、別の意見も出てくるだろうし、その意見で救われる人も中にはいるはず。ネットやSNSなど誰の情報なのかわからないものを信じるのではなく、人が１から創り上げたものに意味がある。（FACTは出所不明な情報ではなく、全てが記録として残っているTrue Story【実話の物語】にある。）
-                  </p>
-                </div>
-              </div>
+            
+               <Message />
             </section>
 
             {/* 仲間募集 */}
@@ -152,9 +120,9 @@ const AboutPage = () => {
             {/* 過去の開催履歴 */}
             <section className="mt-24 border-t border-neutral-700 pt-16">
               <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-emerald-400 to-teal-400 text-transparent bg-clip-text">
-                開催履歴
+                過去作品
               </h2>
-              <p className="text-center text-neutral-400 mb-16">Past Events Timeline</p>
+              <p className="text-center text-neutral-400 mb-16">Past works</p>
               
               {/* タイムライン */}
               <div className="relative">
