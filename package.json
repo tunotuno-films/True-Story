@@ -7,7 +7,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint --cache",
+    "lint:fix": "eslint --cache --fix",
+    "format": "prettier --check --cache .",
+    "format:fix": "prettier --write --cache ."
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
