@@ -10,6 +10,7 @@ import Message from '@/components/Message';
 import ProjectOverview from '@/components/about/ProjectOverview';
 import Recruitment from '@/components/about/Recruitment';
 import PastWorks from '@/components/about/PastWorks';
+import Contact from '@/components/Contact'
 
 const AboutPage = () => {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -31,9 +32,11 @@ const AboutPage = () => {
         <Message />
         <Recruitment />
         <PastWorks />
+        <Contact onShowPrivacyPolicy={openPrivacyPolicy} />  
       </main>
       <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
       {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}
+    
     </div>
   );
 };

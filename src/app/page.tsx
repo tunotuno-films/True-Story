@@ -81,6 +81,7 @@ export default function HomePage() {
         <Introduction />
         <Message />
         <GoldAd />
+
         <section id="truestory">
           <TrueStory />
         </section>
