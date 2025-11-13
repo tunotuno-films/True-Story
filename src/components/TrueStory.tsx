@@ -211,7 +211,7 @@ https://www.truestory.jp/
           >
             <div className="flex flex-col mb-4 relative">
               <h4 className="text-lg md:text-xl font-semibold text-white text-center py-4">
-                今回募集するテーマは5つ！
+                今回募集するテーマ！
               </h4>
               <div className="mt-2 flex justify-center md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 md:mt-0">
                 {/* 環境変数から読み込み。無ければ public 配下のフォールバック画像を使用し、警告を出す */}
@@ -234,38 +234,13 @@ https://www.truestory.jp/
               ご提供いただきました実話が採用された場合、謝礼として5,000円分のQUOカードを贈呈！
             </p>
 
-            <div className="divide-y divide-neutral-700">
-              <div className="py-3 flex items-center gap-4">
-                <div className="w-6 text-center text-white font-bold">1</div>
-                <div className="text-white">学生時代の葛藤と成長</div>
-              </div>
+           <div className="py-2 text-white pl-10 ">
+          ・恋愛・友情の物語
+          </div>
 
-              <div className="py-3 flex items-center gap-4">
-                <div className="w-6 text-center text-white font-bold">2</div>
-                <div className="text-white">恋愛や友情の転機</div>
-              </div>
 
-              <div className="py-3 flex items-center gap-4">
-                <div className="w-6 text-center text-white font-bold">3</div>
-                <div className="text-white">家族との絆のすれ違い</div>
-              </div>
-
-              <div className="py-3 flex items-center gap-4">
-                <div className="w-6 text-center text-white font-bold">4</div>
-                <div className="text-white">デジタル社会での葛藤</div>
-              </div>
-
-              <div className="py-3 flex items-center gap-4">
-                <div className="w-6 text-center text-white font-bold">5</div>
-                <div className="text-white">夢と挫折、挑戦と成長</div>
-              </div>
-            </div>
-
-            <p className="text-white text-sm text-center mt-4">
-              この5つのテーマから募集を行い、最終的に1つの物語を映像作品にします！
-            </p>
             <p className="text-white text-xs text-center mt-2">
-              ※ご応募いただく実話は、上記5つのテーマのうちいずれか1つに沿った内容でお願いいたします。
+              ※ご応募いただく実話は、上記のテーマに沿った内容でお願いいたします。
             </p>
           </div>
         </div>
