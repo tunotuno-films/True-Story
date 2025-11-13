@@ -10,7 +10,7 @@ import Message from '@/components/Message';
 import ProjectOverview from '@/components/about/ProjectOverview';
 import Recruitment from '@/components/about/Recruitment';
 import PastWorks from '@/components/about/PastWorks';
-import Contact from '@/components/Contact'
+import Contact from '@/components/about/Contact_about'
 
 const AboutPage = () => {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);

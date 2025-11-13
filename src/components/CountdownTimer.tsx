@@ -10,9 +10,9 @@ const CountdownTimer: React.FC = () => {
     };
 
     const calculateTimeLeft = (): Partial<TimeLeft> => {
-        // 目標日を設定（11月31日に設定）
+        // 目標日を設定（12月31日に設定）
         const year = new Date().getFullYear();
-        const difference = +new Date(`${year}-11-30T23:59:59`) - +new Date();
+        const difference = +new Date(`${year}-12-31T23:59:59`) - +new Date();
         let timeLeft: Partial<TimeLeft> = {};
 
         if (difference > 0) {

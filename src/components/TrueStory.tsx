@@ -234,11 +234,10 @@ https://www.truestory.jp/
               ご提供いただきました実話が採用された場合、謝礼として5,000円分のQUOカードを贈呈！
             </p>
 
-            <div className="divide-y divide-neutral-700">
-              <div className="py-3 flex items-center gap-4">
-                <div className="text-white pl-6"> ・　恋愛・友情の物語</div>
-              </div>
-            </div>
+           <div className="py-2 text-white pl-10 ">
+          ・恋愛・友情の物語
+          </div>
+
 
             <p className="text-white text-xs text-center mt-2">
               ※ご応募いただく実話は、上記のテーマに沿った内容でお願いいたします。
