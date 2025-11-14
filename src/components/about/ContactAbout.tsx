@@ -75,7 +75,7 @@ const Contact: React.FC<ContactProps> = ({ onShowPrivacyPolicy }) => {
     };
 
     return (
-        <section id="contact" className="py-20 md:py-32 bg-neutral-900">
+        <section id="contact" className="py-20 md:py-32 bg-[#40848E]">
             <div className="container mx-auto px-6 md:px-12 max-w-3xl">
                 <h2 className="section-title text-4xl md:text-5xl text-center mb-4 gradient-text">
                     CONTACT
@@ -85,7 +85,7 @@ const Contact: React.FC<ContactProps> = ({ onShowPrivacyPolicy }) => {
                 </p>
 
                 {/* セクション背景と揃え、枠・影を無くしてフラットな見た目に */}
-                <div className="bg-neutral-900 p-8 rounded-lg">
+                <div className="bg-[#40848E] p-8 rounded-lg">
                     {isSuccess ? (
                         <div className="text-center text-white p-8">
                             <h3 className="text-2xl font-bold mb-4 text-emerald-400">送信完了</h3>

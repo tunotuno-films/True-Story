@@ -6,11 +6,15 @@ import Footer from '../../components/Footer';
 import Seo from '@/components/Seo';
 import { seoKeywords } from '../../constants';
 import PrivacyPolicy from '../../components/PrivacyPolicy';
-import Message from '@/components/Message';
+import Message from '@/components/about/Message';
 import ProjectOverview from '@/components/about/ProjectOverview';
 import Recruitment from '@/components/about/Recruitment';
 import PastWorks from '@/components/about/PastWorks';
-import Contact from '@/components/about/Contact_about'
+import Contact from '@/components/about/ContactAbout';
+import Country from '@/components/about/Company';
+import Staff from '@/components/about/Staff';
+import Crowdfunding from '@/components/about/CrowdfundingAbout';
+
 
 const AboutPage = () => {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -30,9 +34,12 @@ const AboutPage = () => {
       <main className="pb-32">
         <ProjectOverview />
         <Message />
+        <Country />
+        <Staff />
         <Recruitment />
         <PastWorks />
         <Contact onShowPrivacyPolicy={openPrivacyPolicy} />  
+        <Crowdfunding />
       </main>
       <Footer onShowPrivacyPolicy={openPrivacyPolicy} />
       {showPrivacyPolicy && <PrivacyPolicy onClose={closePrivacyPolicy} />}

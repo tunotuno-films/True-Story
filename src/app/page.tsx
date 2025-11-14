@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Title from '../components/Title';
 import Introduction from '../components/Introduction';
-import Message from '../components/Message';
 import TrueStory from '../components/TrueStory';
 import Artist from '../components/Artist';
 import News from '../components/News';
@@ -79,7 +78,6 @@ export default function HomePage() {
         <News />
         <MainAd />
         <Introduction />
-        <Message />
         <GoldAd />
 
         <section id="truestory">
