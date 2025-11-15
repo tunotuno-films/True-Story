@@ -169,7 +169,7 @@ const Contact: React.FC<ContactProps> = ({ onShowPrivacyPolicy }) => {
                                         id="inquiryType"
                                         value={formData.inquiryType}
                                         onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white"
+                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-500"
                                         disabled={isSubmitting}
                                     >
                                         <option value="" disabled>選択してください</option>

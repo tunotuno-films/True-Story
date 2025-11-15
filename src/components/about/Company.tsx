@@ -4,34 +4,82 @@ import React from "react";
 
 const CompanyInfo = () => {
   return (
-    <section className="bg-[#40848E] text-white py-12 w-full">
-      <div className="px-6 text-center">
-        <h2 className="text-3xl font-bold mb-6">運営会社情報</h2>
-        <ul className="space-y-3 text-lg">
-          <li>
-            <strong>会社名:</strong> 株式会社サンプル
+
+    <section className="bg-[#40848E] text-white py-14 w-full">
+      <div className="px-6 max-w-3xl mx-auto">
+        <h2 className="text-2xl font-bold mb-12 text-center">
+          運営会社情報
+        </h2>
+
+        {/* --- 1社目 --- */}
+        <ul className="space-y-4 text-base leading-7 mb-12">
+         <h3 className="text-2xl font-bold mb-4">ルミノスタジオ株式会社</h3>
+          <li className="flex">
+            <span className="font-semibold w-12">所在地</span>
+            <span className="w-5 text-left">：</span>
+            <span>
+              〒354-0035<br />
+              埼玉県富士見市ふじみ野西１丁目18−１ 斉藤ビル 3F
+            </span>
           </li>
-          <li>
-            <strong>所在地:</strong> 東京都渋谷区1-2-3 サンプルビル
+          <li className="flex">
+            <span className="font-semibold w-12">Mail</span>
+            <span className="w-5 text-left">：</span>
+            <span>info@luminostudio.net</span>
           </li>
-          <li>
-            <strong>設立:</strong> 2020年4月1日
+          <li className="flex">
+            <span className="font-semibold w-12">Tel</span>
+            <span className="ont-semibold w-5 text-left">：</span>
+            <span>090-1808-6458</span>
           </li>
-          <li>
-            <strong>代表者:</strong> 山田 太郎
+          <li className="flex">
+            <span className="font-semibold w-12">Web</span>
+            <span className="ont-semibold w-5 text-left">：</span>
+            <a
+              href="https://luminostudio.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:opacity-80"
+            >
+              https://luminostudio.net/
+            </a>
           </li>
-          <li>
-            <strong>事業内容:</strong> ウェブサービスの企画・開発・運営
+
+        </ul>
+
+        {/* --- 2社目 --- */}
+        <ul className="space-y-4 text-base leading-7">
+          <h3 className="text-2xl font-bold mb-4">PEGASUS株式会社</h3>
+          
+          <li className="flex">
+            <span className="font-semibold w-12">所在地</span>
+            <span className="w-5 text-left">：</span>
+            <span>
+              〒160-0023<br />
+              東京都新宿区西新宿３丁目３番１３号 西新宿水間ビル２Ｆ
+            </span>
           </li>
-          <li>
-            <strong>連絡先:</strong> info@example.com
+          <li className="flex">
+            <span className="font-semibold w-12">Web</span>
+            <span className="w-5 text-left">：</span>
+            <a
+              href="https://shoma-piano.themedia.jp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:opacity-80"
+            >
+              https://shoma-piano.themedia.jp/
+            </a>
           </li>
-          <li>
-            <strong>電話番号:</strong> 03-1234-5678
-          </li>
+
+
         </ul>
       </div>
     </section>
+
+
+
+
   );
 };
 
